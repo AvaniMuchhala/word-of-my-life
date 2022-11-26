@@ -7,6 +7,7 @@ var movieRequestURL = "https://api.themoviedb.org/3/search/multi?query=" + wordO
 
 fetch(movieRequestURL)
     .then(function (response) {
+        console.log(response);
         return response.json();
     })
     .then(function (data) {
