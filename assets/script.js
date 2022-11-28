@@ -7,101 +7,9 @@ var movieAPIKey = "63d7ebc58121dff8f561b458dad5480f";
 var wordOfDay = '';
 var movieSection = document.querySelector(".content");
 
-// URL variables
-var randomUrl =
-  "https://api.wordnik.com/v4/words.json/randomWord?hasDictionaryDef=true&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&minLength=5&maxLength=-1&api_key=" +
-  wordnikKey;
-var synonymUrl =
-  "https://www.dictionaryapi.com/api/v3/references/thesaurus/json/" +
-  wordOfDay +
-  "?key=" +
-  synonymMRKey;
-
-
-function getMovieData() {
-    movieSection.textContent = "";
-
-    var movieRequestURL = "https://api.themoviedb.org/3/search/multi?query=" + wordOfDay + "&api_key=" + movieAPIKey;
-    fetch(movieRequestURL)
-        .then(function (response) {
-            return response.json();
-        })
-        .then(function (data) {
-            console.log("Movie/TV results: ");
-            console.log(data.results);
-
-            // Decide on num of results to display (maximum of first 5 results)
-            if (data.results.length <= 5) {
-                var numResults = data.results.length;
-            } else {
-                var numResults = 5;
-            }
-
-            // Loop through results and display media info for 5 results (movie or tv)
-            var resultsDisplayed = 1;
-            var i = 0; // index of data.results array
-            while (resultsDisplayed <= numResults) {
-                // If index is out of bounds, break out of while-loop
-                if (i >= data.results.length) {
-                    break;
-                }
-
-                // Confirm that result's media type is not a person
-                if (data.results[i].media_type !== "person") {
-
-                    // Check whether media is movie or TV to get title and release date
-                    var title = document.createElement("h2");
-                    var releaseDate = document.createElement("li");
-                    // var genre = document.createElement("li");
-                    if (data.results[i].media_type === "movie") {
-                        title.textContent = data.results[i].title;
-                        if (data.results[i].release_date === "") {
-                            releaseDate.textContent = "Release Date: none";
-                        } else {
-                            releaseDate.textContent = "Release Date: " + data.results[i].release_date;
-                        }
-                    } else if (data.results[i].media_type === "tv") {
-                        title.textContent = data.results[i].name;
-                        if (data.results[i].first_air_date === "") {
-                            releaseDate.textContent = "First Air Date: none";
-                        } else {
-                            releaseDate.textContent = "First Air Date: " + data.results[i].first_air_date;
-                        }
-                    }
-
-                    // Movie/TV title
-                    movieSection.appendChild(title);
-
-                    // Media poster image
-                    if (data.results[i].poster_path !== null) {
-                        var poster = document.createElement("img");
-                        poster.setAttribute("src", "http://image.tmdb.org/t/p/w200//" + data.results[i].poster_path);
-                        movieSection.appendChild(poster);
-                    }
-
-                    // Media type (movie or tv)
-                    var mediaType = document.createElement("li");
-                    mediaType.textContent = "Media Type: " + data.results[i].media_type;
-                    movieSection.appendChild(mediaType);
-
-                    // Release date
-                    movieSection.appendChild(releaseDate);
-
-                    // Summary/overview
-                    var summary = document.createElement("li");
-                    if (data.results[i].overview === "") {
-                        summary.textContent = "Summary: none";
-                    } else {
-                        summary.textContent = "Summary: " + data.results[i].overview;
-                    }
-                    movieSection.appendChild(summary);
-
-                    resultsDisplayed++;
-                }
-                i++;
-            }
-        });
-}
+// URL varriables
+var randomUrl = 'https://api.wordnik.com/v4/words.json/randomWord?hasDictionaryDef=true&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&minLength=5&maxLength=-1&api_key=' + wordnikKey;
+var synonymUrl = 'https://www.dictionaryapi.com/api/v3/references/thesaurus/json/' + wordOfDay + '?key=' + synonymMRKey;
 
 
 function getMovieData() {
@@ -191,16 +99,6 @@ function getMovieData() {
 
 // Gets the definition
 function getDefinition() {
-  var defineUrl =
-    "https://api.wordnik.com/v4/word.json/" +
-    wordOfDay +
-    "/definitions?limit=1&includeRelated=false&useCanonical=false&includeTags=false&api_key=" +
-    wordnikKey;
-
-  // Fetches Wordnik definition
-  fetch(defineUrl)
-    .then(function (response) {
-      console.log(response);
     var defineUrl = 'https://api.wordnik.com/v4/word.json/' + wordOfDay + '/definitions?limit=1&includeRelated=false&useCanonical=false&includeTags=false&api_key=' + wordnikKey;
 
     // Fetches Wordnik definition
@@ -228,15 +126,15 @@ function getDefinitionMR() {
         .then(function (data) {
             console.log(data);
 
-      console.log('Part of Speech: ' + data[0].partOfSpeech);
-      console.log('Definition, ' + data[0].attributionText + ': ' + data[0].text);
+            console.log('Part of Speech: ' + data[0].partOfSpeech);
+            console.log('Definition, ' + data[0].attributionText + ': ' + data[0].text);
 
-      getDefinitionMR();
-    })
+            getDefinitionMR();
+        })
 }
 
 function getDefinitionMR() {
-  var redefineUrl = 'https://www.dictionaryapi.com/api/v3/references/collegiate/json/' + wordOfDay + '?key=' + defineMRKey;
+    var redefineUrl = 'https://www.dictionaryapi.com/api/v3/references/collegiate/json/' + wordOfDay + '?key=' + defineMRKey;
 
     // Fetches Merriam-Webster definition
     fetch(redefineUrl)
@@ -248,20 +146,24 @@ function getDefinitionMR() {
         .then(function (data) {
             console.log(data);
 
-            console.log('Part of Speech: ' + data[0].fl);
-            console.log('Definition, per Merriam-Webster: ' + data[0].shortdef[0]);
-            console.log('Etmology:' + data[0].et[0][2]);
+            if (data[0].shortdef) {
+              console.log('Part of Speech: ' + data[0].fl);
+              console.log('Definition, per Merriam-Webster: ' + data[0].shortdef[0]);
+              console.log('Etmology:' + data[0].et[0][2]);
+              getMRSynonyms();
+            }
+            else {
+              getWKDefinition();
+            }
         })
 
-      console.log("Part of Speech: " + data[0].fl);
-      console.log("Definition, per Merriam-Webster: " + data[0].shortdef[0]);
-      console.log("Etmology:" + data[0].et[0][2]);
-    });
 }
 
-function getSynonyms() {
+function getMRSynonyms() {
+  var synonymMKUrl = 'https://www.dictionaryapi.com/api/v3/references/thesaurus/json/' + wordOfDay + '?key=' + synonymMRKey;
+
   // Fetches synonyms via Merriam-Webster's API
-  fetch(synonymUrl)
+  fetch(synonymMKUrl)
   .then(function (response) {
     console.log(response);
 
@@ -276,19 +178,13 @@ function getSynonyms() {
   })
 }
 
-// Gets word of the day
-function getWord() {
-  // Fetches a random word
-  fetch(randomUrl)
-    .then(function (response) {
-      console.log(response);
-}
+function getWKSynonyms() {
+  var synonymWKUrl = 'https://api.wordnik.com/v4/word.json/' + wordOfDay + '/relatedWords?useCanonical=false&relationshipTypes=synonym&limitPerRelationshipType=10&api_key=' + wordnikKey;
 
-function getSynonyms() {
-    // Fetches synonyms via Merriam-Webster's API
-    fetch(synonymUrl)
-        .then(function (response) {
-            console.log(response);
+  // Fetches synonyms via Merriam-Webster's API
+  fetch(synonymWKUrl)
+  .then(function (response) {
+    console.log(response);
 
             return response.json();
         })
