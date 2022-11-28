@@ -1,5 +1,10 @@
-.header {
-    font-family: EBGaramond ;
+html,body {
+    font-family:EBGaramond ;
+    height: 100%;
+}
+
+#fancy-font {
+font-family: 'Great Vibes', cursive;
 }
 
 .movie {
@@ -7,34 +12,28 @@
 
 }
 
-.box {
-    box-shadow: 10px 10px 10px 10px black;
+/* .box {
+    box-shadow: 5px 5px 5px 5px black;
     margin-left: 50px;
     width: 100px;
-}
+} */
 
 .book {
     font-family: Nanum Gothic ;
 
 }
 
-.button {
+/* .button {
     background-color: blueviolet;
     color: azure;
     margin-left: 946px;
     margin-bottom: 10px;
     position: absolute;
-}
-
+} */
+/* 
 .search {
     margin-left: 776px;
     margin-top: 10px;
     position: absolute;
-}
+} */
 
-.box2 {
-    box-shadow: 10px 10px 10px 10px black;
-margin-right: 50px;
-height: 800px;
-
-}
