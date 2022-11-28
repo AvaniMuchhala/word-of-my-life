@@ -1,5 +1,14 @@
+html,body {
+
+    height: 100%;
+}
+
 #fancy-font {
-/* font-family: 'unifrakturMaguntia'; */
 font-family: 'Great Vibes', cursive;
+}
+
+body {
+    font-family: 'EB Garamond', serif;
+
 }
 
