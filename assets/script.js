@@ -9,7 +9,8 @@ var movieSection = document.querySelector(".content");
 
 // URL varriables
 var randomUrl = 'https://api.wordnik.com/v4/words.json/randomWord?hasDictionaryDef=true&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&minLength=5&maxLength=-1&api_key=' + wordnikKey;
-var synonymUrl = 'https://www.dictionaryapi.com/api/v3/references/thesaurus/json/' + wordOfDay + '?key=' + synonymMRKey;
+var etymologyURL = 'https://api.wordnik.com/v4/word.json/' + wordOfDay + '/etymologies?useCanonical=false&api_key=' + wordnikKey;
+
 
 
 function getMovieData() {
@@ -98,9 +99,9 @@ function getMovieData() {
 }
 
 // Gets the definition
-function getDefinition() {
-    var defineUrl = 'https://api.wordnik.com/v4/word.json/' + wordOfDay + '/definitions?limit=1&includeRelated=false&useCanonical=false&includeTags=false&api_key=' + wordnikKey;
-
+function getWKDefinition() {
+  var defineUrl = 'https://api.wordnik.com/v4/word.json/' + wordOfDay + '/definitions?limit=1&includeRelated=false&useCanonical=false&includeTags=false&api_key=' + wordnikKey;
+  
     // Fetches Wordnik definition
     fetch(defineUrl)
         .then(function (response) {
@@ -111,15 +112,22 @@ function getDefinition() {
         .then(function (data) {
             console.log(data);
 
-            console.log('Part of Speech: ' + data[0].partOfSpeech);
-            console.log('Definition, ' + data[0].attributionText + ': ' + data[0].text);
-
-            getDefinitionMR();
+      fetch(etymologyURL)
+        .then(function (response) {
+          console.log(response);
+    
+          return response.json();
         })
+        .then(function (data) {
+          console.log(data);
+        })
+      
+      getWKSynonyms();
+    })
 }
 
-function getDefinitionMR() {
-    var redefineUrl = 'https://www.dictionaryapi.com/api/v3/references/collegiate/json/' + wordOfDay + '?key=' + defineMRKey;
+function getMRDefinition() {
+  var redefineUrl = 'https://www.dictionaryapi.com/api/v3/references/collegiate/json/' + wordOfDay + '?key=' + defineMRKey;
 
     // Fetches Merriam-Webster definition
     fetch(redefineUrl)
@@ -131,18 +139,45 @@ function getDefinitionMR() {
         .then(function (data) {
             console.log(data);
 
-            console.log('Part of Speech: ' + data[0].fl);
-            console.log('Definition, per Merriam-Webster: ' + data[0].shortdef[0]);
-            console.log('Etmology:' + data[0].et[0][2]);
+            if (data[0].shortdef) {
+              console.log('Part of Speech: ' + data[0].fl);
+              console.log('Definition, per Merriam-Webster: ' + data[0].shortdef[0]);
+              console.log('Etmology:' + data[0].et[0][2]);
+              getMRSynonyms();
+            }
+            else {
+              getWKDefinition();
+            }
         })
-
+  
 }
 
-function getSynonyms() {
-    // Fetches synonyms via Merriam-Webster's API
-    fetch(synonymUrl)
-        .then(function (response) {
-            console.log(response);
+function getMRSynonyms() {
+  var synonymMKUrl = 'https://www.dictionaryapi.com/api/v3/references/thesaurus/json/' + wordOfDay + '?key=' + synonymMRKey;
+
+  // Fetches synonyms via Merriam-Webster's API
+  fetch(synonymMKUrl)
+  .then(function (response) {
+    console.log(response);
+
+    return response.json();
+  })
+  .then(function (data) {
+    console.log(data);
+
+    var text = 'Synonyms: '
+    
+    console.log(text + data[0].syns.join(', '));
+  })
+}
+
+function getWKSynonyms() {
+  var synonymWKUrl = 'https://api.wordnik.com/v4/word.json/' + wordOfDay + '/relatedWords?useCanonical=false&relationshipTypes=synonym&limitPerRelationshipType=10&api_key=' + wordnikKey;
+
+  // Fetches synonyms via Merriam-Webster's API
+  fetch(synonymWKUrl)
+  .then(function (response) {
+    console.log(response);
 
             return response.json();
         })
