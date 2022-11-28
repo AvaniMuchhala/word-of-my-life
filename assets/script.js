@@ -10,6 +10,24 @@ var wordOfDay = '';
 var randomUrl = 'https://api.wordnik.com/v4/words.json/randomWord?hasDictionaryDef=true&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&minLength=5&maxLength=-1&api_key=' + wordnikKey;
 var synonymUrl = 'https://www.dictionaryapi.com/api/v3/references/thesaurus/json/' + wordOfDay + '?key=' + synonymMRKey;
 
+function getBookData() {
+  var bookRequestURL = "https://openlibrary.org/search.json?title=" + wordOfDay;
+  fetch(bookRequestURL)
+    .then(function (response) {
+        return response.json();
+    })
+    .then(function (data) {
+        console.log(data);
+
+        for (var i = 0; i < 5; i++) {
+            console.log("Book title: " + data.docs[i].title);
+            var authors = data.docs[i].author_name.join(", ");
+            console.log("Author: " + authors);
+            console.log("Open Library URL: https://openlibrary.org" + data.docs[i].key);
+        }
+    });
+}
+
 // Gets the definition
 function getDefinition() {
   var defineUrl = 'https://api.wordnik.com/v4/word.json/' + wordOfDay + '/definitions?limit=1&includeRelated=false&useCanonical=false&includeTags=false&api_key=' + wordnikKey;
