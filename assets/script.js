@@ -7,7 +7,7 @@ var wordOfDay = '';
 
 // URL varriables
 var randomUrl = 'https://api.wordnik.com/v4/words.json/randomWord?hasDictionaryDef=true&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&minLength=5&maxLength=-1&api_key=' + wordnikKey;
-var etmologyURL = 'https://api.wordnik.com/v4/word.json/' + wordOfDay + '/etymologies?useCanonical=false&api_key=' + wordnikKey;
+var etymologyURL = 'https://api.wordnik.com/v4/word.json/' + wordOfDay + '/etymologies?useCanonical=false&api_key=' + wordnikKey;
 
 
 // Gets the definition
@@ -27,7 +27,7 @@ function getWKDefinition() {
       console.log('Part of Speech: ' + data[0].partOfSpeech);
       console.log('Definition, ' + data[0].attributionText + ': ' + data[0].text);
 
-      fetch()
+      fetch(etymologyURL)
         .then(function (response) {
           console.log(response);
     
