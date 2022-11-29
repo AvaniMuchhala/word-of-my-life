@@ -15,7 +15,7 @@ var synonymUrl = 'https://www.dictionaryapi.com/api/v3/references/thesaurus/json
 function getMovieData() {
     mediaSection.textContent = "";
 
-    var movieRequestURL = "https://api.themoviedb.org/3/search/multi?query=" + "low-end" + "&api_key=" + movieAPIKey;
+    var movieRequestURL = "https://api.themoviedb.org/3/search/multi?query=" + wordOfDay + "&api_key=" + movieAPIKey;
     fetch(movieRequestURL)
         .then(function (response) {
             return response.json();
@@ -48,29 +48,33 @@ function getMovieData() {
 
                     // Confirm that result's media type is not a person
                     if (data.results[i].media_type !== "person") {
+                        // Except for 1st result, display hor line break before displaying result
+                        if (resultsDisplayed >= 1) {
+                            var lineBreak = document.createElement("hr");
+                            mediaSection.append(lineBreak);
+                        }
 
                         // Check whether media is movie or TV to get title and release date
-                        var title = document.createElement("h2");
+                        var title = document.createElement("h3");
+                        title.classList.add("is-size-3", "has-text-white-ter", "is-italic", "mt-3");
                         var releaseDate = document.createElement("p");
+                        releaseDate.classList.add("is-size-5");
                         // var genre = document.createElement("li");
                         if (data.results[i].media_type === "movie") {
                             title.textContent = data.results[i].title;
                             if (data.results[i].release_date === "") {
-                                releaseDate.textContent = "Release Date: none";
+                                releaseDate.innerHTML = "<b class='has-text-black'>Release Date:</b> none";
                             } else {
-                                releaseDate.textContent = "Release Date: " + data.results[i].release_date;
+                                releaseDate.innerHTML = "<b class='has-text-black'>Release Date:</b> " + data.results[i].release_date;
                             }
                         } else if (data.results[i].media_type === "tv") {
                             title.textContent = data.results[i].name;
-                            if (data.results[i].first_air_date === "") {
-                                releaseDate.textContent = "First Air Date: none";
+                            if (!data.results[i].first_air_date) {
+                                releaseDate.innerHTML = "<b class='has-text-black'>First Air Date:</b> none";
                             } else {
-                                releaseDate.textContent = "First Air Date: " + data.results[i].first_air_date;
+                                releaseDate.innerHTML = "<b class='has-text-black'>First Air Date:</b> " + data.results[i].first_air_date;
                             }
                         }
-
-                        // Movie/TV title
-                        mediaSection.appendChild(title);
 
                         // Media poster image
                         var poster = document.createElement("img");
@@ -81,25 +85,22 @@ function getMovieData() {
                             poster.setAttribute("src", "https://image.tmdb.org/t/p/w200//" + data.results[i].poster_path);
                             poster.setAttribute("alt", "movie/tv poster image");
                         }
-                        mediaSection.appendChild(poster);
 
                         // Media type (movie or tv)
                         var mediaType = document.createElement("p");
-                        mediaType.textContent = "Media Type: " + data.results[i].media_type;
-                        mediaSection.appendChild(mediaType);
-
-                        // Release date
-                        mediaSection.appendChild(releaseDate);
+                        mediaType.innerHTML = "<b class='has-text-black'>Media Type:</b> " + data.results[i].media_type;
+                        mediaType.classList.add("is-size-5");
 
                         // Summary/overview
                         var summary = document.createElement("p");
                         if (data.results[i].overview === "") {
-                            summary.textContent = "Summary: none";
+                            summary.innerHTML = "<b class='has-text-black'>Summary:</b> none";
                         } else {
-                            summary.textContent = "Summary: " + data.results[i].overview;
+                            summary.innerHTML = "<b class='has-text-black'>Summary:</b> " + data.results[i].overview;
                         }
-                        mediaSection.appendChild(summary);
+                        summary.classList.add("is-size-5");
 
+                        mediaSection.append(title, poster, mediaType, releaseDate, summary);
                         resultsDisplayed++;
                     }
                     i++;
