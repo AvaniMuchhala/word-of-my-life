@@ -174,7 +174,13 @@ function getMRSynonyms() {
         var syns = data[0].meta.syns;
       }
 
-      synonymEl.textContent = text + syns.join(", ");
+      if (syns.length > 5) {
+        syns = syns.slice(0, 5);
+        
+        synonymEl.textContent = text + syns.join(", ");
+      } else {
+        synonymEl.textContent = text + syns.join(", ");
+      }
     })
 }
 
@@ -240,10 +246,8 @@ function getWord() {
         wordOfDay = data.word;
 
         window.localStorage.setItem(today, wordOfDay);
-
-
+        
         wordEl.textContent = wordOfDay;
-        console.log(wordOfDay);
 
         getMRDefinition();
         getMovieData();
