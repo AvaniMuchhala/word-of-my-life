@@ -101,6 +101,7 @@ function getMovieData() {
         });
 }
 
+// Gets the synonyms from Wordnik
 function getWKSynonyms() {
   var synonymWKUrl = 'https://api.wordnik.com/v4/word.json/' + wordOfDay + '/relatedWords?useCanonical=false&relationshipTypes=synonym&limitPerRelationshipType=5&api_key=' + wordnikKey;
   synonymEl.innerHTML = "";
@@ -118,8 +119,18 @@ function getWKSynonyms() {
       var text = 'Synonoms: ';
       var syns = data[0].words;
 
+      // Checks to see the list is an array of synonym arrays
       if (Array.isArray(syns[0])) {
         synonymEl.textContent = text + syns[0].join(", ");
+      } else {
+        synonymEl.textContent = text + syns.join(", ");
+      }
+
+      // Limits the amount of synonyms to 5
+      if (syns.length > 5) {
+        syns = syns.slice(0, 5);
+        
+        synonymEl.textContent = text + syns.join(", ");
       } else {
         synonymEl.textContent = text + syns.join(", ");
       }
@@ -128,11 +139,12 @@ function getWKSynonyms() {
     })
 }
 
-// Gets the definition
+// Gets the definition from Wordnik
 function getWKDefinition() {
   var defineUrl = 'https://api.wordnik.com/v4/word.json/' + wordOfDay + '/definitions?limit=1&includeRelated=false&useCanonical=false&includeTags=false&api_key=' + wordnikKey;
   posEl.innerHTML = "";
   definitionEl.innerHTML = "";
+  var bold = document.createElement("strong");
 
   // Fetches Wordnik definition
   fetch(defineUrl)
@@ -144,15 +156,13 @@ function getWKDefinition() {
     .then(function (data) {
       console.log(data);
 
-      console.log("Part of Speech: " + data[0].partOfSpeech);
-      console.log("Definition, " + data[0].attributionText + ": " + data[0].text);
-
       posEl.textContent = data[0].partOfSpeech;
       definitionEl.textContent = data[0].text;
       getWKSynonyms();
     });
 }
 
+// Gets the synonyms from Merriam-Webster
 function getMRSynonyms() {
   var synonymMKUrl = 'https://www.dictionaryapi.com/api/v3/references/thesaurus/json/' + wordOfDay + '?key=' + synonymMRKey;
   synonymEl.innerHTML = "";
@@ -168,12 +178,15 @@ function getMRSynonyms() {
       console.log(data);
 
       var text = 'Synonyms: ';
+      // Checks to see the list is an array of synonym arrays
       if (Array.isArray(data[0].meta.syns[0])) {
         var syns = data[0].meta.syns[0];
       } else {
         var syns = data[0].meta.syns;
       }
+      bold.textContent = text;
 
+      // Limits the amount of synonyms to 5
       if (syns.length > 5) {
         syns = syns.slice(0, 5);
         
@@ -184,10 +197,12 @@ function getMRSynonyms() {
     })
 }
 
+// Gets the definition from Merriam-Webster
 function getMRDefinition() {
   var redefineUrl = 'https://www.dictionaryapi.com/api/v3/references/collegiate/json/' + wordOfDay + '?key=' + defineMRKey;
   posEl.innerHTML = "";
   definitionEl.innerHTML = "";
+  var italics = document.createElement("em");
 
   // Fetches Merriam-Webster definition
   fetch(redefineUrl)
@@ -198,12 +213,19 @@ function getMRDefinition() {
     })
     .then(function (data) {
       console.log(data);
+      var poSpeech = data[0].fl;
+      var defArray = data[0].shortdef;
 
       if (data[0].shortdef) {
-        console.log('Part of Speech: ' + data[0].fl);
-        console.log('Definition, per Merriam-Webster: ' + data[0].shortdef[0]);
-        posEl.textContent = data[0].fl;
+        posEl.textContent = poSpeech;
         definitionEl.textContent = data[0].shortdef[0];
+        for (let i = 0; i < defArray.length; i++) {
+          if (defArray.length === 1 || !defArray[i].includes(":")) {
+            definitionEl.textContent = defArray[i];
+            break;
+          }
+          continue;
+        }
         getMRSynonyms();
       }
       else {
@@ -212,12 +234,14 @@ function getMRDefinition() {
     })
 }
 
-// Gets word of the day
+// Retrieves and sets a word for display
 function getWord() {  
   var randomUrl = 'https://api.wordnik.com/v4/words.json/randomWord?hasDictionaryDef=true&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&minLength=5&maxLength=-1&api_key=' + wordnikKey;
 
   wordEl.innerHTML = "";
+  var underline = document.createElement("u");
   
+  // Checks to where to source the word of the day
   if (wordSearch.value !== '') {
       wordOfDay = wordSearch.value;
       wordEl.textContent = wordOfDay;
