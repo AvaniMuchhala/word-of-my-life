@@ -11,6 +11,79 @@ var mediaSection = document.querySelector("#media");
 var randomUrl = 'https://api.wordnik.com/v4/words.json/randomWord?hasDictionaryDef=true&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&minLength=5&maxLength=-1&api_key=' + wordnikKey;
 var synonymUrl = 'https://www.dictionaryapi.com/api/v3/references/thesaurus/json/' + wordOfDay + '?key=' + synonymMRKey;
 
+function getBookData() {
+    mediaSection.textContent = "";
+
+    var bookRequestURL = "https://openlibrary.org/search.json?title=" + wordOfDay;
+    fetch(bookRequestURL)
+        .then(function (response) {
+            return response.json();
+        })
+        .then(function (data) {
+            console.log("Book results: ");
+            console.log(data);
+
+            // Decide on num of results to display (maximum of first 5 results)
+            if (data.docs.length <= 5) {
+                var numResults = data.docs.length;
+            } else {
+                var numResults = 5;
+            }
+
+            for (var i = 0; i < numResults; i++) {
+                //console.log("Book title: " + data.docs[i].title);
+                var authors = data.docs[i].author_name.join(", ");
+                //console.log("Author: " + authors);
+                //console.log("Open Library URL: https://openlibrary.org" + data.docs[i].key);
+
+                // Book title
+                var title = document.createElement("h2");
+                title.textContent = data.docs[i].title;
+                title.classList.add("is-size-3", "has-text-white-ter", "is-italic", "mt-3");
+                mediaSection.appendChild(title);
+
+                // Author name(s)
+                var authors = document.createElement("p");
+                if (data.docs[i].author_name === []) {
+                    authors.innerHTML = "<b class='has-text-black'>Author(s):</b> none"; 
+                } else {
+                    authors.innerHTML = "<b class='has-text-black'>Author(s):</b> " + data.docs[i].author_name.join(", ");
+                }
+                authors.classList.add("is-size-5");
+                mediaSection.appendChild(authors);
+
+                // Book subject(s)
+                var subjects = document.createElement("p");
+                if (data.docs[i].subject) {
+                    // Show maximum of 10 subjects
+                    var subjectsList;
+                    if (data.docs[i].subject.length > 10) {
+                        subjectsList = [];
+                        for (var s = 0; s < 10; s++) {
+                            subjectsList.push(data.docs[i].subject[s]);
+                        }
+                        subjectsList = subjectsList.join(", ");
+                    } else {
+                        subjectsList = data.docs[i].subject.join(", ")
+                    }
+                    subjects.innerHTML = "<b class='has-text-black'>Subjects:</b> " + subjectsList;
+                } else {
+                    subjects.innerHTML = "<b class='has-text-black'>Subjects:</b> none";
+                }
+                subjects.classList.add("is-size-5");
+                mediaSection.appendChild(subjects);
+                
+                // Read More link
+                var linkEl = document.createElement("a");
+                linkEl.innerHTML = "<b><u>Read More</u></b>";
+                linkEl.setAttribute("href", "https://openlibrary.org" + data.docs[i].key);
+                linkEl.setAttribute("target", "_blank");
+                linkEl.classList.add("is-size-5");
+                mediaSection.appendChild(linkEl);
+
+            }
+        });
+}
 
 function getMovieData() {
     mediaSection.textContent = "";
@@ -245,7 +318,8 @@ function getWord(event) {
                 // getDefinition();
                 // getSynonyms();
 
-                getMovieData();
+                // getMovieData();
+                getBookData();
             }
         })
 }
