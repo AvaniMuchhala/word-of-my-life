@@ -27,6 +27,7 @@ function getMovieData() {
             // Movie error in case no elements in "data.results" or all results are people
             var movieError = document.createElement("h2");
             movieError.textContent = "No movie or TV content related to this word.";
+            movieError.classList.add("is-size-5");
             if (data.results.length === 0) {    
                 mediaSection.append(movieError);
             } else {
