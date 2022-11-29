@@ -13,7 +13,7 @@ var defineMRKey = "0d506d29-33ec-4e0b-ac9a-e584f336c692";
 var synonymMRKey = "d051d5ac-5f7c-4338-8a27-3f68c90156c6";
 var movieAPIKey = "63d7ebc58121dff8f561b458dad5480f";
 
-var wordOfDay = '';
+var wordOfDay = "";
 var today = dayjs().format("YYYY-M-D");
 
 function getMovieData() {
@@ -103,21 +103,17 @@ function getMovieData() {
 
 // Gets the synonyms from Wordnik
 function getWKSynonyms() {
-  var synonymWKUrl = 'https://api.wordnik.com/v4/word.json/' + wordOfDay + '/relatedWords?useCanonical=false&relationshipTypes=synonym&limitPerRelationshipType=5&api_key=' + wordnikKey;
+  var synonymWKUrl = "https://api.wordnik.com/v4/word.json/" + wordOfDay + "/relatedWords?useCanonical=false&relationshipTypes=synonym&limitPerRelationshipType=5&api_key=" + wordnikKey;
   synonymEl.innerHTML = "";
   var bold = document.createElement("b");
 
-  // Fetches synonyms via Merriam-Webster's API
+  // Fetches synonyms via Merriam-Webster"s API
   fetch(synonymWKUrl)
     .then(function (response) {
-      console.log(response);
-
       return response.json();
     })
     .then(function (data) {
-      console.log(data);
-
-      var text = 'Synonoms: ';
+      var text = "Synonoms: ";
       var syns = data[0].words;
       bold.textContent = text
 
@@ -146,7 +142,7 @@ function getWKSynonyms() {
 
 // Gets the definition from Wordnik
 function getWKDefinition() {
-  var defineUrl = 'https://api.wordnik.com/v4/word.json/' + wordOfDay + '/definitions?limit=1&includeRelated=false&useCanonical=false&includeTags=false&api_key=' + wordnikKey;
+  var defineUrl = "https://api.wordnik.com/v4/word.json/" + wordOfDay + "/definitions?limit=1&includeRelated=false&useCanonical=false&includeTags=false&api_key=" + wordnikKey;
   posEl.innerHTML = "";
   definitionEl.innerHTML = "";
   var italics = document.createElement("em");
@@ -154,12 +150,9 @@ function getWKDefinition() {
   // Fetches Wordnik definition
   fetch(defineUrl)
     .then(function (response) {
-      console.log(response);
-
       return response.json();
     })
     .then(function (data) {
-      console.log(data);
       var poSpeech = data[0].partOfSpeech;
       var defArray = data[0].text;
       italics.textContent = poSpeech;
@@ -172,21 +165,17 @@ function getWKDefinition() {
 
 // Gets the synonyms from Merriam-Webster
 function getMRSynonyms() {
-  var synonymMKUrl = 'https://www.dictionaryapi.com/api/v3/references/thesaurus/json/' + wordOfDay + '?key=' + synonymMRKey;
+  var synonymMKUrl = "https://www.dictionaryapi.com/api/v3/references/thesaurus/json/" + wordOfDay + "?key=" + synonymMRKey;
   synonymEl.innerHTML = "";
   var bold = document.createElement("b");
 
-  // Fetches synonyms via Merriam-Webster's API
+  // Fetches synonyms via Merriam-Webster"s API
   fetch(synonymMKUrl)
     .then(function (response) {
-      console.log(response);
-
       return response.json();
     })
     .then(function (data) {
-      console.log(data);
-
-      var text = 'Synonyms: ';
+      var text = "Synonyms: ";
       // Checks to see the list is an array of synonym arrays
       if (Array.isArray(data[0].meta.syns[0])) {
         var syns = data[0].meta.syns[0];
@@ -195,7 +184,7 @@ function getMRSynonyms() {
       }
       bold.textContent = text;
 
-      // Limits the amount of synonyms to 5
+      // Limits the amount of synonyms to 5 words
       if (syns.length > 5) {
         syns = syns.slice(0, 5);
         synonymEl.append(bold);
@@ -211,7 +200,7 @@ function getMRSynonyms() {
 
 // Gets the definition from Merriam-Webster
 function getMRDefinition() {
-  var redefineUrl = 'https://www.dictionaryapi.com/api/v3/references/collegiate/json/' + wordOfDay + '?key=' + defineMRKey;
+  var redefineUrl = "https://www.dictionaryapi.com/api/v3/references/collegiate/json/" + wordOfDay + "?key=" + defineMRKey;
   posEl.innerHTML = "";
   definitionEl.innerHTML = "";
   var italics = document.createElement("em");
@@ -219,12 +208,9 @@ function getMRDefinition() {
   // Fetches Merriam-Webster definition
   fetch(redefineUrl)
     .then(function (response) {
-      console.log(response);
-
       return response.json();
     })
     .then(function (data) {
-      console.log(data);
       var poSpeech = data[0].fl;
       var defArray = data[0].shortdef;
       italics.textContent = poSpeech;
@@ -249,13 +235,13 @@ function getMRDefinition() {
 
 // Retrieves and sets a word for display
 function getWord() {  
-  var randomUrl = 'https://api.wordnik.com/v4/words.json/randomWord?hasDictionaryDef=true&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&minLength=5&maxLength=-1&api_key=' + wordnikKey;
+  var randomUrl = "https://api.wordnik.com/v4/words.json/randomWord?hasDictionaryDef=true&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&minLength=5&maxLength=-1&api_key=" + wordnikKey;
 
   wordEl.innerHTML = "";
   var underline = document.createElement("u");
   
   // Checks to where to source the word of the day
-  if (wordSearch.value !== '') {
+  if (wordSearch.value !== "") {
       wordOfDay = wordSearch.value;
       underline.textContent = wordOfDay;
       wordEl.appendChild(underline);
@@ -275,13 +261,9 @@ function getWord() {
     // Fetches a random word
     fetch(randomUrl)
       .then(function (response) {
-        console.log(response);
-
         return response.json();
       })
       .then(function (data) {
-        console.log(data);
-
         wordOfDay = data.word;
 
         window.localStorage.setItem(today, wordOfDay);
