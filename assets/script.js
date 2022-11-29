@@ -105,6 +105,7 @@ function getMovieData() {
 function getWKSynonyms() {
   var synonymWKUrl = 'https://api.wordnik.com/v4/word.json/' + wordOfDay + '/relatedWords?useCanonical=false&relationshipTypes=synonym&limitPerRelationshipType=5&api_key=' + wordnikKey;
   synonymEl.innerHTML = "";
+  var bold = document.createElement("b");
 
   // Fetches synonyms via Merriam-Webster's API
   fetch(synonymWKUrl)
@@ -118,6 +119,7 @@ function getWKSynonyms() {
 
       var text = 'Synonoms: ';
       var syns = data[0].words;
+      bold.textContent = text
 
       // Checks to see the list is an array of synonym arrays
       if (Array.isArray(syns[0])) {
@@ -129,9 +131,12 @@ function getWKSynonyms() {
       // Limits the amount of synonyms to 5
       if (syns.length > 5) {
         syns = syns.slice(0, 5);
+        synonymEl.append(bold);
         
         synonymEl.textContent = text + syns.join(", ");
       } else {
+        synonymEl.append(bold);
+
         synonymEl.textContent = text + syns.join(", ");
       }
 
@@ -144,7 +149,7 @@ function getWKDefinition() {
   var defineUrl = 'https://api.wordnik.com/v4/word.json/' + wordOfDay + '/definitions?limit=1&includeRelated=false&useCanonical=false&includeTags=false&api_key=' + wordnikKey;
   posEl.innerHTML = "";
   definitionEl.innerHTML = "";
-  var bold = document.createElement("strong");
+  var italics = document.createElement("em");
 
   // Fetches Wordnik definition
   fetch(defineUrl)
@@ -155,9 +160,12 @@ function getWKDefinition() {
     })
     .then(function (data) {
       console.log(data);
+      var poSpeech = data[0].partOfSpeech;
+      var defArray = data[0].text;
+      italics.textContent = poSpeech;
 
-      posEl.textContent = data[0].partOfSpeech;
-      definitionEl.textContent = data[0].text;
+      posEl.append(italics);
+      definitionEl.textContent = defArray;
       getWKSynonyms();
     });
 }
@@ -166,6 +174,7 @@ function getWKDefinition() {
 function getMRSynonyms() {
   var synonymMKUrl = 'https://www.dictionaryapi.com/api/v3/references/thesaurus/json/' + wordOfDay + '?key=' + synonymMRKey;
   synonymEl.innerHTML = "";
+  var bold = document.createElement("b");
 
   // Fetches synonyms via Merriam-Webster's API
   fetch(synonymMKUrl)
@@ -189,10 +198,13 @@ function getMRSynonyms() {
       // Limits the amount of synonyms to 5
       if (syns.length > 5) {
         syns = syns.slice(0, 5);
+        synonymEl.append(bold);
         
-        synonymEl.textContent = text + syns.join(", ");
+        synonymEl.append(syns.join(", "));
       } else {
-        synonymEl.textContent = text + syns.join(", ");
+        synonymEl.append(bold);
+
+        synonymEl.append(syns.join(", "));
       }
     })
 }
@@ -215,10 +227,11 @@ function getMRDefinition() {
       console.log(data);
       var poSpeech = data[0].fl;
       var defArray = data[0].shortdef;
+      italics.textContent = poSpeech;
 
+      // Defaults to Wordnik if Merriam-Webster cannot define the word
       if (data[0].shortdef) {
-        posEl.textContent = poSpeech;
-        definitionEl.textContent = data[0].shortdef[0];
+        posEl.append(italics);
         for (let i = 0; i < defArray.length; i++) {
           if (defArray.length === 1 || !defArray[i].includes(":")) {
             definitionEl.textContent = defArray[i];
@@ -244,14 +257,16 @@ function getWord() {
   // Checks to where to source the word of the day
   if (wordSearch.value !== '') {
       wordOfDay = wordSearch.value;
-      wordEl.textContent = wordOfDay;
+      underline.textContent = wordOfDay;
+      wordEl.appendChild(underline);
 
       getMRDefinition();
       getMovieData();
   } 
   else if (window.localStorage.getItem(today)) {
     wordOfDay = window.localStorage.getItem(today);
-    wordEl.textContent = wordOfDay;
+    underline.textContent = wordOfDay;
+    wordEl.appendChild(underline);
 
     getMRDefinition();
     getMovieData();
@@ -270,8 +285,8 @@ function getWord() {
         wordOfDay = data.word;
 
         window.localStorage.setItem(today, wordOfDay);
-        
-        wordEl.textContent = wordOfDay;
+        underline.textContent = wordOfDay;
+        wordEl.appendChild(underline);
 
         getMRDefinition();
         getMovieData();
