@@ -118,9 +118,13 @@ function getWKSynonyms() {
       var text = 'Synonoms: ';
       var syns = data[0].words;
 
-      console.log(text + data[0].words.join(', '));
+      if (Array.isArray(syns[0])) {
+        synonymEl.textContent = text + syns[0].join(", ");
+      } else {
+        synonymEl.textContent = text + syns.join(", ");
+      }
 
-      synonymEl.textContent = text + syns.join(" ,");
+      
     })
 }
 
@@ -164,11 +168,13 @@ function getMRSynonyms() {
       console.log(data);
 
       var text = 'Synonyms: ';
-      var syns = data[0].syns;
-      
-      console.log(text + data[0].syns.join(', '));
+      if (Array.isArray(data[0].meta.syns[0])) {
+        var syns = data[0].meta.syns[0];
+      } else {
+        var syns = data[0].meta.syns;
+      }
 
-      synonymEl.textContent = text + syns.join(" ,");
+      synonymEl.textContent = text + syns.join(", ");
     })
 }
 
@@ -190,7 +196,6 @@ function getMRDefinition() {
       if (data[0].shortdef) {
         console.log('Part of Speech: ' + data[0].fl);
         console.log('Definition, per Merriam-Webster: ' + data[0].shortdef[0]);
-        console.log('Etmology:' + data[0].et[0][2]);
         posEl.textContent = data[0].fl;
         definitionEl.textContent = data[0].shortdef[0];
         getMRSynonyms();
@@ -206,11 +211,10 @@ function getWord() {
   var randomUrl = 'https://api.wordnik.com/v4/words.json/randomWord?hasDictionaryDef=true&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&minLength=5&maxLength=-1&api_key=' + wordnikKey;
 
   wordEl.innerHTML = "";
-
-  console.log(window.localStorage.getItem(today));
   
   if (wordSearch.value !== '') {
       wordOfDay = wordSearch.value;
+      wordEl.textContent = wordOfDay;
 
       getMRDefinition();
       getMovieData();
@@ -218,11 +222,9 @@ function getWord() {
   else if (window.localStorage.getItem(today)) {
     wordOfDay = window.localStorage.getItem(today);
     wordEl.textContent = wordOfDay;
-    console.log(wordOfDay);
 
     getMRDefinition();
     getMovieData();
-
   }
   else {
     // Fetches a random word
@@ -249,9 +251,5 @@ function getWord() {
   }
 }
 
-function apple() {
-  console.log("This is an apple!");
-}
-
 getWord();
-// button.addEventListener("click", getWord);
+button.addEventListener("click", getWord);
