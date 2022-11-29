@@ -14,7 +14,7 @@ var synonymUrl = 'https://www.dictionaryapi.com/api/v3/references/thesaurus/json
 function getBookData() {
     mediaSection.textContent = "";
 
-    var bookRequestURL = "https://openlibrary.org/search.json?title=" + wordOfDay;
+    var bookRequestURL = "https://openlibrary.org/search.json?title=" + "narnia";
     fetch(bookRequestURL)
         .then(function (response) {
             return response.json();
@@ -23,64 +23,84 @@ function getBookData() {
             console.log("Book results: ");
             console.log(data);
 
-            // Decide on num of results to display (maximum of first 5 results)
-            if (data.docs.length <= 5) {
-                var numResults = data.docs.length;
+            // Book error in case no elements in "data.docs"
+            var bookError = document.createElement("h2");
+            bookError.textContent = "No book content related to this word.";
+            bookError.classList.add("is-size-5");
+            if (data.docs.length === 0) {
+                mediaSection.append(bookError);
             } else {
-                var numResults = 5;
-            }
 
-            for (var i = 0; i < numResults; i++) {
-                //console.log("Book title: " + data.docs[i].title);
-                var authors = data.docs[i].author_name.join(", ");
-                //console.log("Author: " + authors);
-                //console.log("Open Library URL: https://openlibrary.org" + data.docs[i].key);
-
-                // Book title
-                var title = document.createElement("h2");
-                title.textContent = data.docs[i].title;
-                title.classList.add("is-size-3", "has-text-white-ter", "is-italic", "mt-3");
-                mediaSection.appendChild(title);
-
-                // Author name(s)
-                var authors = document.createElement("p");
-                if (data.docs[i].author_name === []) {
-                    authors.innerHTML = "<b class='has-text-black'>Author(s):</b> none"; 
+                // Decide on num of results to display (maximum of first 5 results)
+                if (data.docs.length <= 5) {
+                    var numResults = data.docs.length;
                 } else {
-                    authors.innerHTML = "<b class='has-text-black'>Author(s):</b> " + data.docs[i].author_name.join(", ");
+                    var numResults = 5;
                 }
-                authors.classList.add("is-size-5");
-                mediaSection.appendChild(authors);
 
-                // Book subject(s)
-                var subjects = document.createElement("p");
-                if (data.docs[i].subject) {
-                    // Show maximum of 10 subjects
-                    var subjectsList;
-                    if (data.docs[i].subject.length > 10) {
-                        subjectsList = [];
-                        for (var s = 0; s < 10; s++) {
-                            subjectsList.push(data.docs[i].subject[s]);
-                        }
-                        subjectsList = subjectsList.join(", ");
-                    } else {
-                        subjectsList = data.docs[i].subject.join(", ")
+                for (var i = 0; i < numResults; i++) {
+                    // Except for 1st result, display hor line break before displaying result
+                    if (i >= 1) {
+                        var lineBreak = document.createElement("hr");
+                        mediaSection.append(lineBreak);
                     }
-                    subjects.innerHTML = "<b class='has-text-black'>Subjects:</b> " + subjectsList;
-                } else {
-                    subjects.innerHTML = "<b class='has-text-black'>Subjects:</b> none";
-                }
-                subjects.classList.add("is-size-5");
-                mediaSection.appendChild(subjects);
-                
-                // Read More link
-                var linkEl = document.createElement("a");
-                linkEl.innerHTML = "<b><u>Read More</u></b>";
-                linkEl.setAttribute("href", "https://openlibrary.org" + data.docs[i].key);
-                linkEl.setAttribute("target", "_blank");
-                linkEl.classList.add("is-size-5");
-                mediaSection.appendChild(linkEl);
 
+                    // Book title
+                    var title = document.createElement("h2");
+                    title.textContent = data.docs[i].title;
+                    title.classList.add("is-size-3", "has-text-white-ter", "is-italic", "mt-3");
+                    mediaSection.appendChild(title);
+
+                    // Book cover
+                    var cover = document.createElement("img");
+                    if (data.docs[i].cover_i) {
+                        cover.setAttribute("src", "https://covers.openlibrary.org/b/id/" + data.docs[i].cover_i + "-M.jpg");
+                        cover.setAttribute("alt", "book cover image");
+                    } else {
+                        cover.setAttribute("src", "https://via.placeholder.com/180x250");
+                        cover.setAttribute("alt", "placeholder image for book cover");
+                    }
+                    mediaSection.appendChild(cover);
+
+                    // Author name(s)
+                    var authors = document.createElement("p");
+                    if (data.docs[i].author_name === []) {
+                        authors.innerHTML = "<b class='has-text-black'>Author(s):</b> none";
+                    } else {
+                        authors.innerHTML = "<b class='has-text-black'>Author(s):</b> " + data.docs[i].author_name.join(", ");
+                    }
+                    authors.classList.add("is-size-5");
+                    mediaSection.appendChild(authors);
+
+                    // Book subject(s)
+                    var subjects = document.createElement("p");
+                    if (data.docs[i].subject) {
+                        // Show maximum of 10 subjects
+                        var subjectsList;
+                        if (data.docs[i].subject.length > 10) {
+                            subjectsList = [];
+                            for (var s = 0; s < 10; s++) {
+                                subjectsList.push(data.docs[i].subject[s]);
+                            }
+                            subjectsList = subjectsList.join(", ");
+                        } else {
+                            subjectsList = data.docs[i].subject.join(", ")
+                        }
+                        subjects.innerHTML = "<b class='has-text-black'>Subject(s):</b> " + subjectsList;
+                    } else {
+                        subjects.innerHTML = "<b class='has-text-black'>Subject(s):</b> none";
+                    }
+                    subjects.classList.add("is-size-5");
+                    mediaSection.appendChild(subjects);
+
+                    // Read More link
+                    var linkEl = document.createElement("a");
+                    linkEl.innerHTML = "<b><u>Read More</u></b>";
+                    linkEl.setAttribute("href", "https://openlibrary.org" + data.docs[i].key);
+                    linkEl.setAttribute("target", "_blank");
+                    linkEl.classList.add("is-size-5");
+                    mediaSection.appendChild(linkEl);
+                }
             }
         });
 }
@@ -100,7 +120,8 @@ function getMovieData() {
             // Movie error in case no elements in "data.results" or all results are people
             var movieError = document.createElement("h2");
             movieError.textContent = "No movie or TV content related to this word.";
-            if (data.results.length === 0) {    
+            movieError.classList.add("is-size-5");
+            if (data.results.length === 0) {
                 mediaSection.append(movieError);
             } else {
                 // Decide on num of results to display (maximum of first 5 results)
@@ -199,17 +220,17 @@ function getDefinition() {
         .then(function (data) {
             console.log("Part of Speech: " + data[0].partOfSpeech);
             console.log("Definition, " + data[0].attributionText + ": " + data[0].text);
-      
+
             getDefinitionMR();
         });
 }
 
 function getDefinitionMR() {
-  var redefineUrl =
-    "https://www.dictionaryapi.com/api/v3/references/collegiate/json/" +
-    wordOfDay +
-    "?key=" +
-    defineMRKey;
+    var redefineUrl =
+        "https://www.dictionaryapi.com/api/v3/references/collegiate/json/" +
+        wordOfDay +
+        "?key=" +
+        defineMRKey;
     fetch(redefineUrl)
         .then(function (response) {
             return response.json();
@@ -238,44 +259,44 @@ function getDefinitionMR() {
             console.log(data);
 
             if (data[0].shortdef) {
-              console.log('Part of Speech: ' + data[0].fl);
-              console.log('Definition, per Merriam-Webster: ' + data[0].shortdef[0]);
-              console.log('Etmology:' + data[0].et[0][2]);
-              getMRSynonyms();
+                console.log('Part of Speech: ' + data[0].fl);
+                console.log('Definition, per Merriam-Webster: ' + data[0].shortdef[0]);
+                console.log('Etmology:' + data[0].et[0][2]);
+                getMRSynonyms();
             }
             else {
-              getWKDefinition();
+                getWKDefinition();
             }
         })
 
 }
 
 function getMRSynonyms() {
-  var synonymMKUrl = 'https://www.dictionaryapi.com/api/v3/references/thesaurus/json/' + wordOfDay + '?key=' + synonymMRKey;
+    var synonymMKUrl = 'https://www.dictionaryapi.com/api/v3/references/thesaurus/json/' + wordOfDay + '?key=' + synonymMRKey;
 
-  // Fetches synonyms via Merriam-Webster's API
-  fetch(synonymMKUrl)
-  .then(function (response) {
-    console.log(response);
+    // Fetches synonyms via Merriam-Webster's API
+    fetch(synonymMKUrl)
+        .then(function (response) {
+            console.log(response);
 
-    return response.json();
-  })
-  .then(function (data) {
-    console.log(data);
+            return response.json();
+        })
+        .then(function (data) {
+            console.log(data);
 
-    var text = 'Synonyms: '
-    
-    console.log(text + data[0].syns.join(', '));
-  })
+            var text = 'Synonyms: '
+
+            console.log(text + data[0].syns.join(', '));
+        })
 }
 
 function getWKSynonyms() {
-  var synonymWKUrl = 'https://api.wordnik.com/v4/word.json/' + wordOfDay + '/relatedWords?useCanonical=false&relationshipTypes=synonym&limitPerRelationshipType=10&api_key=' + wordnikKey;
+    var synonymWKUrl = 'https://api.wordnik.com/v4/word.json/' + wordOfDay + '/relatedWords?useCanonical=false&relationshipTypes=synonym&limitPerRelationshipType=10&api_key=' + wordnikKey;
 
-  // Fetches synonyms via Merriam-Webster's API
-  fetch(synonymWKUrl)
-  .then(function (response) {
-    console.log(response);
+    // Fetches synonyms via Merriam-Webster's API
+    fetch(synonymWKUrl)
+        .then(function (response) {
+            console.log(response);
 
             return response.json();
         })
