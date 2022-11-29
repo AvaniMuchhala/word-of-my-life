@@ -344,3 +344,14 @@ fetch(movieRequestURL)
 
 var button = document.querySelector(".button");
 button.addEventListener("click", getWord);
+
+var scolltoTopBtn = document.querySelector("#footer-button");
+var rootElement = document.documentElement 
+
+function scrolltoTop() {
+  rootElement.scrollTo({
+    top: 0,
+    behavior:"smooth"
+  })
+}
+scrolltoTopBtn.addEventListener("click", scrolltoTop)
