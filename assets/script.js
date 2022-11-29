@@ -14,7 +14,7 @@ var synonymUrl = 'https://www.dictionaryapi.com/api/v3/references/thesaurus/json
 function getBookData() {
     mediaSection.textContent = "";
 
-    var bookRequestURL = "https://openlibrary.org/search.json?title=" + "narnia";
+    var bookRequestURL = "https://openlibrary.org/search.json?title=" + wordOfDay;
     fetch(bookRequestURL)
         .then(function (response) {
             return response.json();
