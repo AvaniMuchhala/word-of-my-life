@@ -207,7 +207,7 @@ function getWord() {
 
   wordEl.innerHTML = "";
 
-  console.log(randomUrl);
+  console.log(window.localStorage.getItem(today));
   
   if (wordSearch.value !== '') {
       wordOfDay = wordSearch.value;
@@ -216,7 +216,8 @@ function getWord() {
       getMovieData();
   } 
   else if (window.localStorage.getItem(today)) {
-    wordEl.textContent = window.localStorage.getItem(today);
+    wordOfDay = window.localStorage.getItem(today);
+    wordEl.textContent = wordOfDay;
     console.log(wordOfDay);
 
     getMRDefinition();
