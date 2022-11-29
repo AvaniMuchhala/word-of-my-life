@@ -6,6 +6,7 @@ var synonymEl = document.querySelector("#synonym");
 var posEl = document.querySelector("#part-of-speech");
 var definitionEl = document.querySelector("#definition");
 var movieSection = document.querySelector(".content");
+var mediaSection = document.querySelector("#media-section");
 
 // API Key variables
 var wordnikKey = "3873f7o2of4s3fj3bugv8zc0cdx8qufrpau3754t2dpvlrjz5";
@@ -18,6 +19,7 @@ var today = dayjs().format("YYYY-M-D");
 
 function getMovieData() {
     movieSection.textContent = "";
+    mediaSection.classList.remove("hide");
 
     var movieRequestURL = "https://api.themoviedb.org/3/search/multi?query=" + wordOfDay + "&api_key=" + movieAPIKey;
     fetch(movieRequestURL)
@@ -111,15 +113,18 @@ function getWKSynonyms() {
   fetch(synonymWKUrl)
     .then(function (response) {
       console.log(response);
-
-      return response.json();
+      if (response.status === 404) {
+        synonymEl.textContent = "Try another word.";
+      } else {
+        return response.json();
+      }
     })
     .then(function (data) {
       console.log(data);
 
       var text = 'Synonoms: ';
       var syns = data[0].words;
-      bold.textContent = text
+      bold.textContent = text;
 
       // Checks to see the list is an array of synonym arrays
       if (Array.isArray(syns[0])) {
@@ -155,8 +160,13 @@ function getWKDefinition() {
   fetch(defineUrl)
     .then(function (response) {
       console.log(response);
-
-      return response.json();
+      if (response.status === 404) {
+        word.textContent = "There does not seem to be a definition for \'" + wordOfDay + "\'.";
+        mediaSection.classList.add("hide");
+        getWKSynonyms();
+      } else {
+        return response.json();
+      }
     })
     .then(function (data) {
       console.log(data);

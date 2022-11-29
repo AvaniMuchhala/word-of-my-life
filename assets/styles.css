@@ -18,6 +18,10 @@ font-family: 'Great Vibes', cursive;
     width: 100px;
 } */
 
+.hide {
+    display: none;
+}
+
 .book {
     font-family: Nanum Gothic ;
 
