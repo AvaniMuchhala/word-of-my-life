@@ -1,112 +1,27 @@
+// Selected elements
+var wordSearch = document.querySelector(".input");
+var button = document.querySelector(".button");
+var wordEl = document.querySelector("#word");
+var synonymEl = document.querySelector("#synonym");
+var posEl = document.querySelector("#part-of-speech");
+var definitionEl = document.querySelector("#definition");
+var mediaSection = document.querySelector("#media-section");
+var media = document.querySelector("#media");
+
 // API Key variables
 var wordnikKey = "3873f7o2of4s3fj3bugv8zc0cdx8qufrpau3754t2dpvlrjz5";
 var defineMRKey = "0d506d29-33ec-4e0b-ac9a-e584f336c692";
 var synonymMRKey = "d051d5ac-5f7c-4338-8a27-3f68c90156c6";
 var movieAPIKey = "63d7ebc58121dff8f561b458dad5480f";
 
-var wordOfDay = '';
-var mediaSection = document.querySelector("#media");
+var wordOfDay = "";
+var today = dayjs().format("YYYY-M-D");
+var hasDictionaryDef;
 
-// URL varriables
-var randomUrl = 'https://api.wordnik.com/v4/words.json/randomWord?hasDictionaryDef=true&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&minLength=5&maxLength=-1&api_key=' + wordnikKey;
-var synonymUrl = 'https://www.dictionaryapi.com/api/v3/references/thesaurus/json/' + wordOfDay + '?key=' + synonymMRKey;
-
-function getBookData() {
-    mediaSection.textContent = "";
-
-    var bookRequestURL = "https://openlibrary.org/search.json?title=" + wordOfDay;
-    fetch(bookRequestURL)
-        .then(function (response) {
-            return response.json();
-        })
-        .then(function (data) {
-            console.log("Book results: ");
-            console.log(data);
-
-            // Book error in case no elements in "data.docs"
-            var bookError = document.createElement("h2");
-            bookError.textContent = "No book content related to this word.";
-            bookError.classList.add("is-size-5");
-            if (data.docs.length === 0) {
-                mediaSection.append(bookError);
-            } else {
-
-                // Decide on num of results to display (maximum of first 5 results)
-                if (data.docs.length <= 5) {
-                    var numResults = data.docs.length;
-                } else {
-                    var numResults = 5;
-                }
-
-                for (var i = 0; i < numResults; i++) {
-                    // Except for 1st result, display hor line break before displaying result
-                    if (i >= 1) {
-                        var lineBreak = document.createElement("hr");
-                        mediaSection.append(lineBreak);
-                    }
-
-                    // Book title
-                    var title = document.createElement("h2");
-                    title.textContent = data.docs[i].title;
-                    title.classList.add("is-size-3", "has-text-white-ter", "is-italic", "mt-3");
-                    mediaSection.appendChild(title);
-
-                    // Book cover
-                    var cover = document.createElement("img");
-                    if (data.docs[i].cover_i) {
-                        cover.setAttribute("src", "https://covers.openlibrary.org/b/id/" + data.docs[i].cover_i + "-M.jpg");
-                        cover.setAttribute("alt", "book cover image");
-                    } else {
-                        cover.setAttribute("src", "https://via.placeholder.com/180x250");
-                        cover.setAttribute("alt", "placeholder image for book cover");
-                    }
-                    mediaSection.appendChild(cover);
-
-                    // Author name(s)
-                    var authors = document.createElement("p");
-                    if (data.docs[i].author_name === []) {
-                        authors.innerHTML = "<b class='has-text-black'>Author(s):</b> none";
-                    } else {
-                        authors.innerHTML = "<b class='has-text-black'>Author(s):</b> " + data.docs[i].author_name.join(", ");
-                    }
-                    authors.classList.add("is-size-5");
-                    mediaSection.appendChild(authors);
-
-                    // Book subject(s)
-                    var subjects = document.createElement("p");
-                    if (data.docs[i].subject) {
-                        // Show maximum of 10 subjects
-                        var subjectsList;
-                        if (data.docs[i].subject.length > 10) {
-                            subjectsList = [];
-                            for (var s = 0; s < 10; s++) {
-                                subjectsList.push(data.docs[i].subject[s]);
-                            }
-                            subjectsList = subjectsList.join(", ");
-                        } else {
-                            subjectsList = data.docs[i].subject.join(", ")
-                        }
-                        subjects.innerHTML = "<b class='has-text-black'>Subject(s):</b> " + subjectsList;
-                    } else {
-                        subjects.innerHTML = "<b class='has-text-black'>Subject(s):</b> none";
-                    }
-                    subjects.classList.add("is-size-5");
-                    mediaSection.appendChild(subjects);
-
-                    // Read More link
-                    var linkEl = document.createElement("a");
-                    linkEl.innerHTML = "<b><u>Read More</u></b>";
-                    linkEl.setAttribute("href", "https://openlibrary.org" + data.docs[i].key);
-                    linkEl.setAttribute("target", "_blank");
-                    linkEl.classList.add("is-size-5");
-                    mediaSection.appendChild(linkEl);
-                }
-            }
-        });
-}
 
 function getMovieData() {
-    mediaSection.textContent = "";
+    media.textContent = "";
+    mediaSection.classList.remove("hide");
 
     var movieRequestURL = "https://api.themoviedb.org/3/search/multi?query=" + wordOfDay + "&api_key=" + movieAPIKey;
     fetch(movieRequestURL)
@@ -114,15 +29,15 @@ function getMovieData() {
             return response.json();
         })
         .then(function (data) {
-            console.log("Movie/TV results: ");
-            console.log(data.results);
+            //console.log("Movie/TV results: ");
+            //console.log(data.results);
 
             // Movie error in case no elements in "data.results" or all results are people
             var movieError = document.createElement("h2");
             movieError.textContent = "No movie or TV content related to this word.";
             movieError.classList.add("is-size-5");
             if (data.results.length === 0) {
-                mediaSection.append(movieError);
+                media.append(movieError);
             } else {
                 // Decide on num of results to display (maximum of first 5 results)
                 if (data.results.length <= 5) {
@@ -145,7 +60,7 @@ function getMovieData() {
                         // Except for 1st result, display hor line break before displaying result
                         if (resultsDisplayed >= 1) {
                             var lineBreak = document.createElement("hr");
-                            mediaSection.append(lineBreak);
+                            media.append(lineBreak);
                         }
 
                         // Check whether media is movie or TV to get title and release date
@@ -194,7 +109,7 @@ function getMovieData() {
                         }
                         summary.classList.add("is-size-5");
 
-                        mediaSection.append(title, poster, mediaType, releaseDate, summary);
+                        media.append(title, poster, mediaType, releaseDate, summary);
                         resultsDisplayed++;
                     }
                     i++;
@@ -202,149 +117,229 @@ function getMovieData() {
 
                 // If no results were displayed (aka all results were people), display movie error
                 if (resultsDisplayed === 0) {
-                    mediaSection.append(movieError);
+                    media.append(movieError);
                 }
             }
         });
 }
 
-// Gets the definition
-function getDefinition() {
-    var defineUrl = 'https://api.wordnik.com/v4/word.json/' + wordOfDay + '/definitions?limit=1&includeRelated=false&useCanonical=false&includeTags=false&api_key=' + wordnikKey;
+// Gets the synonyms from Wordnik
+var syns;
+function getWKSynonyms() {
+    var synonymWKUrl = "https://api.wordnik.com/v4/word.json/" + wordOfDay + "/relatedWords?useCanonical=false&relationshipTypes=synonym&limitPerRelationshipType=5&api_key=" + wordnikKey;
+    synonymEl.innerHTML = "";
+    var bold = document.createElement("b");
+
+    // Fetches synonyms via Merriam-Webster"s API
+    var status;
+    fetch(synonymWKUrl)
+        .then(function (response) {
+            //console.log(response);
+            status = response.status;
+            if (status === 404) {
+                if (hasDictionaryDef) {
+                    synonymEl.textContent = "No synonyms found."
+                } else {
+                    synonymEl.textContent = "Try another word.";
+                }
+                return;
+            }
+            });
+
+    fetch (synonymWKUrl) 
+        .then(function (response) {
+            return response.json();
+        })
+        .then(function (data) {
+            //data = response.json();
+            if (status !== 404) {
+                //console.log(response.json().Promise);
+                //console.log(data);
+                var text = "Synonoms: ";
+                syns = data[0].words;
+                bold.textContent = text;
+    
+                // Checks to see the list is an array of synonym arrays
+                if (Array.isArray(syns[0])) {
+                    synonymEl.textContent = text + syns[0].join(", ");
+                } else {
+                    synonymEl.textContent = text + syns.join(", ");
+                }
+    
+                // Limits the amount of synonyms to 5
+                if (syns.length > 5) {
+                    syns = syns.slice(0, 5);
+                    synonymEl.append(bold);
+    
+                    synonymEl.textContent = text + syns.join(", ");
+                } else {
+                    synonymEl.append(bold);
+    
+                    synonymEl.textContent = text + syns.join(", ");
+                }
+            }
+            
+
+        });
+                
+        
+}
+
+// Gets the definition from Wordnik
+function getWKDefinition() {
+    var defineUrl = "https://api.wordnik.com/v4/word.json/" + wordOfDay + "/definitions?limit=1&includeRelated=false&useCanonical=false&includeTags=false&api_key=" + wordnikKey;
+    posEl.innerHTML = "";
+    definitionEl.innerHTML = "";
+    var italics = document.createElement("em");
 
     // Fetches Wordnik definition
     fetch(defineUrl)
         .then(function (response) {
-            console.log(response);
+            //console.log(response);
+            if (response.status === 404) {
+                word.textContent = "There does not seem to be a definition for \'" + wordOfDay + "\'.";
+                mediaSection.classList.add("hide");
+                getWKSynonyms();
+            } else {
+                hasDictionaryDef = true;
+                return response.json();
+            }
         })
         .then(function (data) {
-            console.log("Part of Speech: " + data[0].partOfSpeech);
-            console.log("Definition, " + data[0].attributionText + ": " + data[0].text);
+            console.log(data);
+            var poSpeech = data[0].partOfSpeech;
+            var defArray = data[0].text;
+            italics.textContent = poSpeech;
 
-            getDefinitionMR();
+            posEl.append(italics);
+            definitionEl.textContent = defArray;
+            getWKSynonyms();
         });
 }
 
-function getDefinitionMR() {
-    var redefineUrl =
-        "https://www.dictionaryapi.com/api/v3/references/collegiate/json/" +
-        wordOfDay +
-        "?key=" +
-        defineMRKey;
-    fetch(redefineUrl)
+// Gets the synonyms from Merriam-Webster
+function getMRSynonyms() {
+    var synonymMKUrl = "https://www.dictionaryapi.com/api/v3/references/thesaurus/json/" + wordOfDay + "?key=" + synonymMRKey;
+    synonymEl.innerHTML = "";
+    var bold = document.createElement("b");
+
+    // Fetches synonyms via Merriam-Webster"s API
+    fetch(synonymMKUrl)
         .then(function (response) {
             return response.json();
         })
         .then(function (data) {
             console.log(data);
+            var text = "Synonyms: ";
 
-            console.log('Part of Speech: ' + data[0].partOfSpeech);
-            console.log('Definition, ' + data[0].attributionText + ': ' + data[0].text);
+            // Check if array has objects or is empty
+            if (data[0].meta) {
+                // Checks to see the list is an array of synonym arrays
+                if (Array.isArray(data[0].meta.syns[0])) {
+                    var syns = data[0].meta.syns[0];
+                } else {
+                    var syns = data[0].meta.syns;
+                }
+                bold.textContent = text;
 
-            getDefinitionMR();
+                // Limits the amount of synonyms to 5 words
+                if (syns.length > 5) {
+                    syns = syns.slice(0, 5);
+                    synonymEl.append(bold);
+
+                    synonymEl.append(syns.join(", "));
+                } else {
+                    synonymEl.append(bold);
+
+                    synonymEl.append(syns.join(", "));
+                }
+            } else {
+                getWKSynonyms();
+            }
+
         })
 }
 
-function getDefinitionMR() {
-    var redefineUrl = 'https://www.dictionaryapi.com/api/v3/references/collegiate/json/' + wordOfDay + '?key=' + defineMRKey;
+// Gets the definition from Merriam-Webster
+function getMRDefinition() {
+    var redefineUrl = "https://www.dictionaryapi.com/api/v3/references/collegiate/json/" + wordOfDay + "?key=" + defineMRKey;
+    posEl.innerHTML = "";
+    definitionEl.innerHTML = "";
+    var italics = document.createElement("em");
 
     // Fetches Merriam-Webster definition
     fetch(redefineUrl)
         .then(function (response) {
-            console.log(response);
-
             return response.json();
         })
         .then(function (data) {
             console.log(data);
 
-            if (data[0].shortdef) {
-                console.log('Part of Speech: ' + data[0].fl);
-                console.log('Definition, per Merriam-Webster: ' + data[0].shortdef[0]);
-                console.log('Etmology:' + data[0].et[0][2]);
+            // Defaults to Wordnik if Merriam-Webster cannot define the word
+            if (data.length > 0 && data[0].shortdef) {
+                hasDictionaryDef = true;
+                var poSpeech = data[0].fl;
+                var defArray = data[0].shortdef;
+                italics.textContent = poSpeech;
+                posEl.append(italics);
+                for (let i = 0; i < defArray.length; i++) {
+                    if (defArray.length === 1 || !defArray[i].includes(":")) {
+                        definitionEl.textContent = defArray[i];
+                        break;
+                    }
+                    continue;
+                }
                 getMRSynonyms();
             }
             else {
                 getWKDefinition();
             }
         })
-
 }
 
-function getMRSynonyms() {
-    var synonymMKUrl = 'https://www.dictionaryapi.com/api/v3/references/thesaurus/json/' + wordOfDay + '?key=' + synonymMRKey;
+// Retrieves and sets a word for display
+function getWord() {
+    hasDictionaryDef = false;
+    var randomUrl = "https://api.wordnik.com/v4/words.json/randomWord?hasDictionaryDef=true&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&minLength=5&maxLength=-1&api_key=" + wordnikKey;
 
-    // Fetches synonyms via Merriam-Webster's API
-    fetch(synonymMKUrl)
-        .then(function (response) {
-            console.log(response);
+    wordEl.innerHTML = "";
+    var underline = document.createElement("u");
 
-            return response.json();
-        })
-        .then(function (data) {
-            console.log(data);
+    // Checks to where to source the word of the day
+    if (wordSearch.value !== "") {
+        wordOfDay = wordSearch.value;
+        underline.textContent = wordOfDay;
+        wordEl.appendChild(underline);
 
-            var text = 'Synonyms: '
+        getMRDefinition();
+        getMovieData();
+    }
+    else if (window.localStorage.getItem(today)) {
+        wordOfDay = window.localStorage.getItem(today);
+        underline.textContent = wordOfDay;
+        wordEl.appendChild(underline);
 
-            console.log(text + data[0].syns.join(', '));
-        })
+        getMRDefinition();
+        getMovieData();
+    }
+    else {
+        // Fetches a random word
+        fetch(randomUrl)
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (data) {
+                wordOfDay = data.word;
+
+                window.localStorage.setItem(today, wordOfDay);
+                underline.textContent = wordOfDay;
+                wordEl.appendChild(underline);
+
+                getMRDefinition();
+                getMovieData();
+            })
+    }
 }
 
-function getWKSynonyms() {
-    var synonymWKUrl = 'https://api.wordnik.com/v4/word.json/' + wordOfDay + '/relatedWords?useCanonical=false&relationshipTypes=synonym&limitPerRelationshipType=10&api_key=' + wordnikKey;
-
-    // Fetches synonyms via Merriam-Webster's API
-    fetch(synonymWKUrl)
-        .then(function (response) {
-            console.log(response);
-
-            return response.json();
-        })
-        .then(function (data) {
-            console.log(data);
-
-            var text = 'Synonyms: '
-
-            console.log(text + data[0].syns.join(', '));
-        })
-}
-
-// Gets word of the day
-function getWord(event) {
-
-    // Fetches a random word
-    fetch(randomUrl)
-        .then(function (response) {
-            console.log(response);
-
-            return response.json();
-        })
-        .then(function (data) {
-            console.log(data);
-
-            wordOfDay = data.word;
-            console.log(wordOfDay);
-
-            alert('The word of the day is: ' + wordOfDay + '.');
-
-            // Display word of day in textbox
-            var wordBox = document.querySelector(".input");
-            wordBox.value = wordOfDay;
-
-            if (confirm('Would you like a new word?')) {
-                getWord();
-            } else {
-                alert('Cool. Enjoy your day!');
-
-                // getDefinition();
-                // getSynonyms();
-
-                // getMovieData();
-                getBookData();
-            }
-        })
-}
-
-//getWord();
-var button = document.querySelector(".button");
+getWord();
 button.addEventListener("click", getWord);
