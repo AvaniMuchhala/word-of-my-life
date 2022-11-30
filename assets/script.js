@@ -24,6 +24,11 @@ var hasDictionaryDef;
 function getGameData() {
     games.textContent = "";
     mediaSection.classList.remove("hide");
+    var gameHeader = document.createElement("h2");
+    gameHeader.textContent = "Video Games";
+    gameHeader.setAttribute("id", "fancy-font");
+    gameHeader.classList.add("is-size-2");
+    games.append(gameHeader);
 
     var gameRequestURL = "https://api.rawg.io/api/games?key=" + gameAPIKey + "&search=" + wordOfDay + "&search_exact=true";
     fetch(gameRequestURL)
@@ -86,6 +91,11 @@ function getGameData() {
 function getBookData() {
     books.textContent = "";
     mediaSection.classList.remove("hide");
+    var bookHeader = document.createElement("h2");
+    bookHeader.textContent = "Books";
+    bookHeader.setAttribute("id", "fancy-font");
+    bookHeader.classList.add("is-size-2");
+    books.append(bookHeader);
 
     var bookRequestURL = "https://openlibrary.org/search.json?title=" + wordOfDay;
     fetch(bookRequestURL)
@@ -181,6 +191,11 @@ function getBookData() {
 function getMovieData() {
     media.textContent = "";
     mediaSection.classList.remove("hide");
+    var mediaHeader = document.createElement("h2");
+    mediaHeader.textContent = "Movie/T.V. Shows";
+    mediaHeader.setAttribute("id", "fancy-font");
+    mediaHeader.classList.add("is-size-2");
+    media.append(mediaHeader);
 
     var movieRequestURL =
         "https://api.themoviedb.org/3/search/multi?query=" +
