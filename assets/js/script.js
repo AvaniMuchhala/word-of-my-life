@@ -36,8 +36,6 @@ function getGameData() {
             return response.json();
         })
         .then(function (data) {
-            console.log("Game results: ");
-            console.log(data);
 
             // Game error in case no elements in "data.results"
             var gameError = document.createElement("h2");
@@ -75,7 +73,7 @@ function getGameData() {
 
                     // Release date
                     var releaseDate = document.createElement("p");
-                    if (releaseDate) {
+                    if (data.results[i].released) {
                         releaseDate.innerHTML = "<b class='has-text-black'>Release Date:</b> " + data.results[i].released;
                     } else {
                         releaseDate.innerHTML = "<b class='has-text-black'>Release Date:</b> none";
@@ -103,8 +101,6 @@ function getBookData() {
             return response.json();
         })
         .then(function (data) {
-            console.log("Book results: ");
-            console.log(data);
 
             // Book error in case no elements in "data.docs"
             var bookError = document.createElement("h2");
@@ -147,7 +143,7 @@ function getBookData() {
 
                     // Author name(s)
                     var authors = document.createElement("p");
-                    if (data.docs[i].author_name === []) {
+                    if (data.docs[i].author_name === [] || !data.docs[i].author_name) {
                         authors.innerHTML = "<b class='has-text-black'>Author(s):</b> none";
                     } else {
                         authors.innerHTML = "<b class='has-text-black'>Author(s):</b> " + data.docs[i].author_name.join(", ");
@@ -207,8 +203,6 @@ function getMovieData() {
             return response.json();
         })
         .then(function (data) {
-            //console.log("Movie/TV results: ");
-            //console.log(data.results);
 
             // Movie error in case no elements in "data.results" or all results are people
             var movieError = document.createElement("h2");
@@ -254,7 +248,7 @@ function getMovieData() {
                         // var genre = document.createElement("li");
                         if (data.results[i].media_type === "movie") {
                             title.textContent = data.results[i].title;
-                            if (data.results[i].release_date === "") {
+                            if (data.results[i].release_date === "" || !data.results[i].release_date) {
                                 releaseDate.innerHTML =
                                     "<b class='has-text-black'>Release Date:</b> none";
                             } else {
@@ -264,7 +258,7 @@ function getMovieData() {
                             }
                         } else if (data.results[i].media_type === "tv") {
                             title.textContent = data.results[i].name;
-                            if (!data.results[i].first_air_date) {
+                            if (!data.results[i].first_air_date || data.results[i].first_air_date === "") {
                                 releaseDate.innerHTML =
                                     "<b class='has-text-black'>First Air Date:</b> none";
                             } else {
@@ -276,7 +270,7 @@ function getMovieData() {
 
                         // Media poster image
                         var poster = document.createElement("img");
-                        if (data.results[i].poster_path === null) {
+                        if (!data.results[i].poster_path) {
                             poster.setAttribute("src", "https://via.placeholder.com/200x250");
                             poster.setAttribute(
                                 "alt",
@@ -300,7 +294,7 @@ function getMovieData() {
 
                         // Summary/overview
                         var summary = document.createElement("p");
-                        if (data.results[i].overview === "") {
+                        if (data.results[i].overview === "" || !data.results[i].overview) {
                             summary.innerHTML = "<b class='has-text-black'>Summary:</b> none";
                         } else {
                             summary.innerHTML =
@@ -337,7 +331,6 @@ function getWKSynonyms() {
     // Fetches synonyms via Merriam-Webster"s API
     var status;
     fetch(synonymWKUrl).then(function (response) {
-        //console.log(response);
         status = response.status;
         if (status === 404) {
             if (hasDictionaryDef) {
@@ -356,9 +349,7 @@ function getWKSynonyms() {
         .then(function (data) {
             //data = response.json();
             if (status !== 404) {
-                //console.log(response.json().Promise);
-                //console.log(data);
-                var text = "Synonoms: ";
+                var text = "Synonyms: ";
                 syns = data[0].words;
                 bold.textContent = text;
 
@@ -398,7 +389,6 @@ function getWKDefinition() {
     // Fetches Wordnik definition
     fetch(defineUrl)
         .then(function (response) {
-            //console.log(response);
             if (response.status === 404) {
                 word.textContent =
                     "There does not seem to be a definition for '" + wordOfDay + "'.";
@@ -410,13 +400,12 @@ function getWKDefinition() {
             }
         })
         .then(function (data) {
-            console.log(data);
             var poSpeech = data[0].partOfSpeech;
             var defArray = data[0].text;
             italics.textContent = poSpeech;
 
             posEl.append(italics);
-            definitionEl.textContent = defArray;
+            definitionEl.innerHTML = defArray;
             getWKSynonyms();
         });
 }
@@ -437,7 +426,6 @@ function getMRSynonyms() {
             return response.json();
         })
         .then(function (data) {
-            console.log(data);
             var text = "Synonyms: ";
 
             // Check if array has objects or is empty
@@ -484,7 +472,6 @@ function getMRDefinition() {
             return response.json();
         })
         .then(function (data) {
-            console.log(data);
 
             // Defaults to Wordnik if Merriam-Webster cannot define the word
             if (data.length > 0 && data[0].shortdef) {
@@ -495,7 +482,7 @@ function getMRDefinition() {
                 posEl.append(italics);
                 for (let i = 0; i < defArray.length; i++) {
                     if (defArray.length === 1 || !defArray[i].includes(":")) {
-                        definitionEl.textContent = defArray[i];
+                        definitionEl.innerHTML = defArray[i];
                         break;
                     }
                     continue;
