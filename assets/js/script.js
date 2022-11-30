@@ -12,8 +12,8 @@ var games = document.querySelector("#games"); // target game section
 
 // API Key variables
 var wordnikKey = "3873f7o2of4s3fj3bugv8zc0cdx8qufrpau3754t2dpvlrjz5";
-var defineMRKey = "0d506d29-33ec-4e0b-ac9a-e584f336c692";
-var synonymMRKey = "d051d5ac-5f7c-4338-8a27-3f68c90156c6";
+var defineMRKey = "b56055f8-5dd4-4d47-914b-b51e7b75bcb1";
+var synonymMRKey = "7d1281dc-461c-4a90-8d8e-a8264e95b041";
 var movieAPIKey = "63d7ebc58121dff8f561b458dad5480f";
 var gameAPIKey = "c7ee19bccbec4b3587e1e8e9aff70902";
 
