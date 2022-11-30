@@ -8,16 +8,80 @@ var definitionEl = document.querySelector("#definition");
 var mediaSection = document.querySelector("#media-section");
 var media = document.querySelector("#movies"); // target movie section
 var books = document.querySelector("#books"); // target book section
+var games = document.querySelector("#games"); // target game section
 
 // API Key variables
 var wordnikKey = "3873f7o2of4s3fj3bugv8zc0cdx8qufrpau3754t2dpvlrjz5";
 var defineMRKey = "0d506d29-33ec-4e0b-ac9a-e584f336c692";
 var synonymMRKey = "d051d5ac-5f7c-4338-8a27-3f68c90156c6";
 var movieAPIKey = "63d7ebc58121dff8f561b458dad5480f";
+var gameAPIKey = "c7ee19bccbec4b3587e1e8e9aff70902";
 
 var wordOfDay = "";
 var today = dayjs().format("YYYY-M-D");
 var hasDictionaryDef;
+
+function getGameData() {
+    games.textContent = "";
+    mediaSection.classList.remove("hide");
+
+    var gameRequestURL = "https://api.rawg.io/api/games?key=" + gameAPIKey + "&search=" + wordOfDay + "&search_exact=true";
+    fetch(gameRequestURL)
+        .then(function (response) {
+            return response.json();
+        })
+        .then(function (data) {
+            console.log("Game results: ");
+            console.log(data);
+
+            // Game error in case no elements in "data.results"
+            var gameError = document.createElement("h2");
+            gameError.textContent = "No game content related to this word.";
+            gameError.classList.add("is-size-5");
+            if (data.results.length === 0) {
+                games.append(gameError);
+            } else {
+                // Decide on num of results to display (maximum of first 5 results)
+                if (data.results.length <= 5) {
+                    var numResults = data.results.length;
+                } else {
+                    var numResults = 5;
+                }
+
+                for (var i = 0; i < numResults; i++) {
+                    // Except for 1st result, display hor line break before displaying result
+                    if (i >= 1) {
+                        var lineBreak = document.createElement("hr");
+                        games.append(lineBreak);
+                    }
+
+                    // Game name
+                    var name = document.createElement("h2");
+                    name.textContent = data.results[i].name;
+                    name.classList.add("is-size-3","is-italic", "mt-3");
+
+                    // Game poster image
+                    var poster = document.createElement("img");
+                    if (data.results[i].background_image) {
+                        poster.setAttribute("src", data.results[i].background_image);
+                    } else {
+                        poster.setAttribute("src", "https://via.placeholder.com/150");
+                    }
+
+                    // Release date
+                    var releaseDate = document.createElement("p");
+                    if (releaseDate) {
+                        releaseDate.innerHTML = "<b class='has-text-black'>Release Date:</b> " + data.results[i].released;
+                    } else {
+                        releaseDate.innerHTML = "<b class='has-text-black'>Release Date:</b> none";
+                    }
+                    releaseDate.classList.add("is-size-5");
+
+                    games.append(name, poster, releaseDate);
+                }
+            }
+        });    
+}
 
 function getBookData() {
     books.textContent = "";
@@ -447,6 +511,7 @@ function getWord() {
         getMRDefinition();
         getMovieData();
         getBookData();
+        getGameData();
     } else if (window.localStorage.getItem(today)) {
         wordOfDay = window.localStorage.getItem(today);
         underline.textContent = wordOfDay;
@@ -455,6 +520,7 @@ function getWord() {
         getMRDefinition();
         getMovieData();
         getBookData();
+        getGameData();
     } else {
         // Fetches a random word
         fetch(randomUrl)
@@ -471,6 +537,7 @@ function getWord() {
                 getMRDefinition();
                 getMovieData();
                 getBookData();
+                getGameData();
             });
     }
 }
