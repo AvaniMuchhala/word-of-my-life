@@ -21,7 +21,33 @@ var wordOfDay = "";
 var today = dayjs().format("YYYY-M-D");
 var hasDictionaryDef;
 
-function getGameData() {
+// Fetch data from all 3 media APIs
+function fetchAPIS() {
+    var gameRequestURL = "https://api.rawg.io/api/games?key=" + gameAPIKey + "&search=" + wordOfDay + "&search_exact=true";
+    const p1 = fetch(gameRequestURL);
+    var bookRequestURL = "https://openlibrary.org/search.json?title=" + wordOfDay;
+    const p2 = fetch(bookRequestURL);
+    var movieRequestURL = "https://api.themoviedb.org/3/search/multi?query=" + wordOfDay + "&api_key=" + movieAPIKey;
+    const p3 = fetch(movieRequestURL);
+    
+    // Return single promise once all 3 promises have been resolved
+    Promise.all([p1, p2, p3])
+        .then((responses) => {
+            // For each response, call json() to return Promise which will resolve w/ JSON object
+            const responsesJSON = responses.map((res) => res.json());
+            console.log(responsesJSON);
+            return Promise.all(responsesJSON);
+        })
+        .then((data) => {
+            console.log(data);
+
+            displayGameData(data[0]);
+            displayBookData(data[1]);
+            displayMovieData(data[2]);
+        })
+}
+
+function displayGameData(data) {
     games.textContent = "";
     mediaSection.classList.remove("hide");
     var gameHeader = document.createElement("h2");
@@ -30,63 +56,55 @@ function getGameData() {
     gameHeader.classList.add("is-size-2");
     games.append(gameHeader);
 
-    var gameRequestURL = "https://api.rawg.io/api/games?key=" + gameAPIKey + "&search=" + wordOfDay + "&search_exact=true";
-    fetch(gameRequestURL)
-        .then(function (response) {
-            return response.json();
-        })
-        .then(function (data) {
+    // Game error in case no elements in "data.results"
+    var gameError = document.createElement("h2");
+    gameError.textContent = "No game content related to this word.";
+    gameError.classList.add("is-size-5");
+    if (data.results.length === 0) {
+        games.append(gameError);
+    } else {
+        // Decide on num of results to display (maximum of first 5 results)
+        if (data.results.length <= 5) {
+            var numResults = data.results.length;
+        } else {
+            var numResults = 5;
+        }
 
-            // Game error in case no elements in "data.results"
-            var gameError = document.createElement("h2");
-            gameError.textContent = "No game content related to this word.";
-            gameError.classList.add("is-size-5");
-            if (data.results.length === 0) {
-                games.append(gameError);
-            } else {
-                // Decide on num of results to display (maximum of first 5 results)
-                if (data.results.length <= 5) {
-                    var numResults = data.results.length;
-                } else {
-                    var numResults = 5;
-                }
-
-                for (var i = 0; i < numResults; i++) {
-                    // Except for 1st result, display hor line break before displaying result
-                    if (i >= 1) {
-                        var lineBreak = document.createElement("hr");
-                        games.append(lineBreak);
-                    }
-
-                    // Game name
-                    var name = document.createElement("h2");
-                    name.textContent = data.results[i].name;
-                    name.classList.add("is-size-3","is-italic", "mt-3");
-
-                    // Game poster image
-                    var poster = document.createElement("img");
-                    if (data.results[i].background_image) {
-                        poster.setAttribute("src", data.results[i].background_image);
-                    } else {
-                        poster.setAttribute("src", "https://via.placeholder.com/150");
-                    }
-
-                    // Release date
-                    var releaseDate = document.createElement("p");
-                    if (data.results[i].released) {
-                        releaseDate.innerHTML = "<b class='has-text-black'>Release Date:</b> " + data.results[i].released;
-                    } else {
-                        releaseDate.innerHTML = "<b class='has-text-black'>Release Date:</b> none";
-                    }
-                    releaseDate.classList.add("is-size-5");
-
-                    games.append(name, poster, releaseDate);
-                }
+        for (var i = 0; i < numResults; i++) {
+            // Except for 1st result, display hor line break before displaying result
+            if (i >= 1) {
+                var lineBreak = document.createElement("hr");
+                games.append(lineBreak);
             }
-        });    
+
+            // Game name
+            var name = document.createElement("h2");
+            name.textContent = data.results[i].name;
+            name.classList.add("is-size-3", "is-italic", "mt-3");
+
+            // Game poster image
+            var poster = document.createElement("img");
+            if (data.results[i].background_image) {
+                poster.setAttribute("src", data.results[i].background_image);
+            } else {
+                poster.setAttribute("src", "https://via.placeholder.com/150");
+            }
+
+            // Release date
+            var releaseDate = document.createElement("p");
+            if (data.results[i].released) {
+                releaseDate.innerHTML = "<b class='has-text-black'>Release Date:</b> " + data.results[i].released;
+            } else {
+                releaseDate.innerHTML = "<b class='has-text-black'>Release Date:</b> none";
+            }
+            releaseDate.classList.add("is-size-5");
+
+            games.append(name, poster, releaseDate);
+        }
+    }
 }
 
-function getBookData() {
+function displayBookData(data) {
     books.textContent = "";
     mediaSection.classList.remove("hide");
     var bookHeader = document.createElement("h2");
@@ -95,96 +113,88 @@ function getBookData() {
     bookHeader.classList.add("is-size-2");
     books.append(bookHeader);
 
-    var bookRequestURL = "https://openlibrary.org/search.json?title=" + wordOfDay;
-    fetch(bookRequestURL)
-        .then(function (response) {
-            return response.json();
-        })
-        .then(function (data) {
+    // Book error in case no elements in "data.docs"
+    var bookError = document.createElement("h2");
+    bookError.textContent = "No book content related to this word.";
+    bookError.classList.add("is-size-5");
+    if (data.docs.length === 0) {
+        books.append(bookError);
+    } else {
 
-            // Book error in case no elements in "data.docs"
-            var bookError = document.createElement("h2");
-            bookError.textContent = "No book content related to this word.";
-            bookError.classList.add("is-size-5");
-            if (data.docs.length === 0) {
-                books.append(bookError);
-            } else {
+        // Decide on num of results to display (maximum of first 5 results)
+        if (data.docs.length <= 5) {
+            var numResults = data.docs.length;
+        } else {
+            var numResults = 5;
+        }
 
-                // Decide on num of results to display (maximum of first 5 results)
-                if (data.docs.length <= 5) {
-                    var numResults = data.docs.length;
-                } else {
-                    var numResults = 5;
-                }
-
-                for (var i = 0; i < numResults; i++) {
-                    // Except for 1st result, display hor line break before displaying result
-                    if (i >= 1) {
-                        var lineBreak = document.createElement("hr");
-                        books.append(lineBreak);
-                    }
-
-                    // Book title
-                    var title = document.createElement("h2");
-                    title.textContent = data.docs[i].title;
-                    title.classList.add("is-size-3", "has-text-white-ter", "is-italic", "mt-3");
-                    books.appendChild(title);
-
-                    // Book cover
-                    var cover = document.createElement("img");
-                    if (data.docs[i].cover_i) {
-                        cover.setAttribute("src", "https://covers.openlibrary.org/b/id/" + data.docs[i].cover_i + "-M.jpg");
-                        cover.setAttribute("alt", "book cover image");
-                    } else {
-                        cover.setAttribute("src", "https://via.placeholder.com/180x250");
-                        cover.setAttribute("alt", "placeholder image for book cover");
-                    }
-                    books.appendChild(cover);
-
-                    // Author name(s)
-                    var authors = document.createElement("p");
-                    if (data.docs[i].author_name === [] || !data.docs[i].author_name) {
-                        authors.innerHTML = "<b class='has-text-black'>Author(s):</b> none";
-                    } else {
-                        authors.innerHTML = "<b class='has-text-black'>Author(s):</b> " + data.docs[i].author_name.join(", ");
-                    }
-                    authors.classList.add("is-size-5");
-                    books.appendChild(authors);
-
-                    // Book subject(s)
-                    var subjects = document.createElement("p");
-                    if (data.docs[i].subject) {
-                        // Show maximum of 10 subjects
-                        var subjectsList;
-                        if (data.docs[i].subject.length > 10) {
-                            subjectsList = [];
-                            for (var s = 0; s < 10; s++) {
-                                subjectsList.push(data.docs[i].subject[s]);
-                            }
-                            subjectsList = subjectsList.join(", ");
-                        } else {
-                            subjectsList = data.docs[i].subject.join(", ")
-                        }
-                        subjects.innerHTML = "<b class='has-text-black'>Subject(s):</b> " + subjectsList;
-                    } else {
-                        subjects.innerHTML = "<b class='has-text-black'>Subject(s):</b> none";
-                    }
-                    subjects.classList.add("is-size-5");
-                    books.appendChild(subjects);
-
-                    // Read More link
-                    var linkEl = document.createElement("a");
-                    linkEl.innerHTML = "<b><u>Read More</u></b>";
-                    linkEl.setAttribute("href", "https://openlibrary.org" + data.docs[i].key);
-                    linkEl.setAttribute("target", "_blank");
-                    linkEl.classList.add("is-size-5");
-                    books.appendChild(linkEl);
-                }
+        for (var i = 0; i < numResults; i++) {
+            // Except for 1st result, display hor line break before displaying result
+            if (i >= 1) {
+                var lineBreak = document.createElement("hr");
+                books.append(lineBreak);
             }
-        });
+
+            // Book title
+            var title = document.createElement("h2");
+            title.textContent = data.docs[i].title;
+            title.classList.add("is-size-3", "has-text-white-ter", "is-italic", "mt-3");
+            books.appendChild(title);
+
+            // Book cover
+            var cover = document.createElement("img");
+            if (data.docs[i].cover_i) {
+                cover.setAttribute("src", "https://covers.openlibrary.org/b/id/" + data.docs[i].cover_i + "-M.jpg");
+                cover.setAttribute("alt", "book cover image");
+            } else {
+                cover.setAttribute("src", "https://via.placeholder.com/180x250");
+                cover.setAttribute("alt", "placeholder image for book cover");
+            }
+            books.appendChild(cover);
+
+            // Author name(s)
+            var authors = document.createElement("p");
+            if (data.docs[i].author_name === [] || !data.docs[i].author_name) {
+                authors.innerHTML = "<b class='has-text-black'>Author(s):</b> none";
+            } else {
+                authors.innerHTML = "<b class='has-text-black'>Author(s):</b> " + data.docs[i].author_name.join(", ");
+            }
+            authors.classList.add("is-size-5");
+            books.appendChild(authors);
+
+            // Book subject(s)
+            var subjects = document.createElement("p");
+            if (data.docs[i].subject) {
+                // Show maximum of 10 subjects
+                var subjectsList;
+                if (data.docs[i].subject.length > 10) {
+                    subjectsList = [];
+                    for (var s = 0; s < 10; s++) {
+                        subjectsList.push(data.docs[i].subject[s]);
+                    }
+                    subjectsList = subjectsList.join(", ");
+                } else {
+                    subjectsList = data.docs[i].subject.join(", ")
+                }
+                subjects.innerHTML = "<b class='has-text-black'>Subject(s):</b> " + subjectsList;
+            } else {
+                subjects.innerHTML = "<b class='has-text-black'>Subject(s):</b> none";
+            }
+            subjects.classList.add("is-size-5");
+            books.appendChild(subjects);
+
+            // Read More link
+            var linkEl = document.createElement("a");
+            linkEl.innerHTML = "<b><u>Read More</u></b>";
+            linkEl.setAttribute("href", "https://openlibrary.org" + data.docs[i].key);
+            linkEl.setAttribute("target", "_blank");
+            linkEl.classList.add("is-size-5");
+            books.appendChild(linkEl);
+        }
+    }
 }
 
-function getMovieData() {
+function displayMovieData(data) {
     media.textContent = "";
     mediaSection.classList.remove("hide");
     var mediaHeader = document.createElement("h2");
@@ -193,128 +203,116 @@ function getMovieData() {
     mediaHeader.classList.add("is-size-2");
     media.append(mediaHeader);
 
-    var movieRequestURL =
-        "https://api.themoviedb.org/3/search/multi?query=" +
-        wordOfDay +
-        "&api_key=" +
-        movieAPIKey;
-    fetch(movieRequestURL)
-        .then(function (response) {
-            return response.json();
-        })
-        .then(function (data) {
+    // Movie error in case no elements in "data.results" or all results are people
+    var movieError = document.createElement("h2");
+    movieError.textContent = "No movie or TV content related to this word.";
+    movieError.classList.add("is-size-5");
+    if (data.results.length === 0) {
+        media.append(movieError);
+    } else {
+        // Decide on num of results to display (maximum of first 5 results)
+        if (data.results.length <= 5) {
+            var numResults = data.results.length;
+        } else {
+            var numResults = 5;
+        }
 
-            // Movie error in case no elements in "data.results" or all results are people
-            var movieError = document.createElement("h2");
-            movieError.textContent = "No movie or TV content related to this word.";
-            movieError.classList.add("is-size-5");
-            if (data.results.length === 0) {
-                media.append(movieError);
-            } else {
-                // Decide on num of results to display (maximum of first 5 results)
-                if (data.results.length <= 5) {
-                    var numResults = data.results.length;
-                } else {
-                    var numResults = 5;
-                }
-
-                // Loop through results and display media info for 5 results (movie or tv)
-                var resultsDisplayed = 0;
-                var i = 0; // index of data.results array
-                while (resultsDisplayed < numResults) {
-                    // If index is out of bounds, break out of while-loop
-                    if (i >= data.results.length) {
-                        break;
-                    }
-
-                    // Confirm that result's media type is not a person
-                    if (data.results[i].media_type !== "person") {
-                        // Except for 1st result, display hor line break before displaying result
-                        if (resultsDisplayed >= 1) {
-                            var lineBreak = document.createElement("hr");
-                            media.append(lineBreak);
-                        }
-
-                        // Check whether media is movie or TV to get title and release date
-                        var title = document.createElement("h3");
-                        title.classList.add(
-                            "is-size-3",
-                            "has-text-white-ter",
-                            "is-italic",
-                            "mt-3"
-                        );
-                        var releaseDate = document.createElement("p");
-                        releaseDate.classList.add("is-size-5");
-                        // var genre = document.createElement("li");
-                        if (data.results[i].media_type === "movie") {
-                            title.textContent = data.results[i].title;
-                            if (data.results[i].release_date === "" || !data.results[i].release_date) {
-                                releaseDate.innerHTML =
-                                    "<b class='has-text-black'>Release Date:</b> none";
-                            } else {
-                                releaseDate.innerHTML =
-                                    "<b class='has-text-black'>Release Date:</b> " +
-                                    data.results[i].release_date;
-                            }
-                        } else if (data.results[i].media_type === "tv") {
-                            title.textContent = data.results[i].name;
-                            if (!data.results[i].first_air_date || data.results[i].first_air_date === "") {
-                                releaseDate.innerHTML =
-                                    "<b class='has-text-black'>First Air Date:</b> none";
-                            } else {
-                                releaseDate.innerHTML =
-                                    "<b class='has-text-black'>First Air Date:</b> " +
-                                    data.results[i].first_air_date;
-                            }
-                        }
-
-                        // Media poster image
-                        var poster = document.createElement("img");
-                        if (!data.results[i].poster_path) {
-                            poster.setAttribute("src", "https://via.placeholder.com/200x250");
-                            poster.setAttribute(
-                                "alt",
-                                "placeholder image for movie/tv poster"
-                            );
-                        } else {
-                            poster.setAttribute(
-                                "src",
-                                "https://image.tmdb.org/t/p/w200//" +
-                                data.results[i].poster_path
-                            );
-                            poster.setAttribute("alt", "movie/tv poster image");
-                        }
-
-                        // Media type (movie or tv)
-                        var mediaType = document.createElement("p");
-                        mediaType.innerHTML =
-                            "<b class='has-text-black'>Media Type:</b> " +
-                            data.results[i].media_type;
-                        mediaType.classList.add("is-size-5");
-
-                        // Summary/overview
-                        var summary = document.createElement("p");
-                        if (data.results[i].overview === "" || !data.results[i].overview) {
-                            summary.innerHTML = "<b class='has-text-black'>Summary:</b> none";
-                        } else {
-                            summary.innerHTML =
-                                "<b class='has-text-black'>Summary:</b> " +
-                                data.results[i].overview;
-                        }
-                        summary.classList.add("is-size-5");
-
-                        media.append(title, poster, mediaType, releaseDate, summary);
-                        resultsDisplayed++;
-                    }
-                    i++;
-                }
-
-                // If no results were displayed (aka all results were people), display movie error
-                if (resultsDisplayed === 0) {
-                    media.append(movieError);
-                }
+        // Loop through results and display media info for 5 results (movie or tv)
+        var resultsDisplayed = 0;
+        var i = 0; // index of data.results array
+        while (resultsDisplayed < numResults) {
+            // If index is out of bounds, break out of while-loop
+            if (i >= data.results.length) {
+                break;
             }
-        });
+
+            // Confirm that result's media type is not a person
+            if (data.results[i].media_type !== "person") {
+                // Except for 1st result, display hor line break before displaying result
+                if (resultsDisplayed >= 1) {
+                    var lineBreak = document.createElement("hr");
+                    media.append(lineBreak);
+                }
+
+                // Check whether media is movie or TV to get title and release date
+                var title = document.createElement("h3");
+                title.classList.add(
+                    "is-size-3",
+                    "has-text-white-ter",
+                    "is-italic",
+                    "mt-3"
+                );
+                var releaseDate = document.createElement("p");
+                releaseDate.classList.add("is-size-5");
+                // var genre = document.createElement("li");
+                if (data.results[i].media_type === "movie") {
+                    title.textContent = data.results[i].title;
+                    if (data.results[i].release_date === "" || !data.results[i].release_date) {
+                        releaseDate.innerHTML =
+                            "<b class='has-text-black'>Release Date:</b> none";
+                    } else {
+                        releaseDate.innerHTML =
+                            "<b class='has-text-black'>Release Date:</b> " +
+                            data.results[i].release_date;
+                    }
+                } else if (data.results[i].media_type === "tv") {
+                    title.textContent = data.results[i].name;
+                    if (!data.results[i].first_air_date || data.results[i].first_air_date === "") {
+                        releaseDate.innerHTML =
+                            "<b class='has-text-black'>First Air Date:</b> none";
+                    } else {
+                        releaseDate.innerHTML =
+                            "<b class='has-text-black'>First Air Date:</b> " +
+                            data.results[i].first_air_date;
+                    }
+                }
+
+                // Media poster image
+                var poster = document.createElement("img");
+                if (!data.results[i].poster_path) {
+                    poster.setAttribute("src", "https://via.placeholder.com/200x250");
+                    poster.setAttribute(
+                        "alt",
+                        "placeholder image for movie/tv poster"
+                    );
+                } else {
+                    poster.setAttribute(
+                        "src",
+                        "https://image.tmdb.org/t/p/w200//" +
+                        data.results[i].poster_path
+                    );
+                    poster.setAttribute("alt", "movie/tv poster image");
+                }
+
+                // Media type (movie or tv)
+                var mediaType = document.createElement("p");
+                mediaType.innerHTML =
+                    "<b class='has-text-black'>Media Type:</b> " +
+                    data.results[i].media_type;
+                mediaType.classList.add("is-size-5");
+
+                // Summary/overview
+                var summary = document.createElement("p");
+                if (data.results[i].overview === "" || !data.results[i].overview) {
+                    summary.innerHTML = "<b class='has-text-black'>Summary:</b> none";
+                } else {
+                    summary.innerHTML =
+                        "<b class='has-text-black'>Summary:</b> " +
+                        data.results[i].overview;
+                }
+                summary.classList.add("is-size-5");
+
+                media.append(title, poster, mediaType, releaseDate, summary);
+                resultsDisplayed++;
+            }
+            i++;
+        }
+
+        // If no results were displayed (aka all results were people), display movie error
+        if (resultsDisplayed === 0) {
+            media.append(movieError);
+        }
+    }
 }
 
 // Gets the synonyms from Wordnik
@@ -426,6 +424,7 @@ function getMRSynonyms() {
             return response.json();
         })
         .then(function (data) {
+            console.log(data);
             var text = "Synonyms: ";
 
             // Check if array has objects or is empty
@@ -472,7 +471,7 @@ function getMRDefinition() {
             return response.json();
         })
         .then(function (data) {
-
+            console.log(data);
             // Defaults to Wordnik if Merriam-Webster cannot define the word
             if (data.length > 0 && data[0].shortdef) {
                 hasDictionaryDef = true;
@@ -511,18 +510,16 @@ function getWord() {
         wordEl.appendChild(underline);
 
         getMRDefinition();
-        getMovieData();
-        getBookData();
-        getGameData();
+
+        fetchAPIS();
     } else if (window.localStorage.getItem(today)) {
         wordOfDay = window.localStorage.getItem(today);
         underline.textContent = wordOfDay;
         wordEl.appendChild(underline);
 
         getMRDefinition();
-        getMovieData();
-        getBookData();
-        getGameData();
+
+        fetchAPIS();
     } else {
         // Fetches a random word
         fetch(randomUrl)
@@ -537,9 +534,8 @@ function getWord() {
                 wordEl.appendChild(underline);
 
                 getMRDefinition();
-                getMovieData();
-                getBookData();
-                getGameData();
+
+                fetchAPIS();
             });
     }
 }
