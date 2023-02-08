@@ -8,7 +8,7 @@ By merging pop culture and linguistics, we hope to inspire people to expand thei
 
 Building this application gave us an opportunity to work with Bulma, a CSS framework, as well as multiple APIs. We were able to manipulate the response data in order to get what we need as well as error handling for missing/bad data. We learned a lot about using GitHub as a collaborative tool and finding resolutions for merge conflicts.
 
-Why not [try it out](https://brianschapman.github.io/word-of-the-day-project/) to find a new word for your life?
+Why not [try it out](https://avanimuchhala.github.io/word-of-my-life/) to find a new word for your life?
 
 ## Usage
 
